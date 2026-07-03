@@ -1,9 +1,24 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.db import models
+
+from .models import Property
+from .forms import PropertyForm
 
 
+# -------------------------
+# HOME (DASHBOARD)
+# -------------------------
+@login_required
+def home(request):
+    return render(request, "dashboard/home.html")
+
+
+# -------------------------
+# LOGIN VIEW
+# -------------------------
 def login_view(request):
 
     if request.method == "POST":
@@ -11,47 +26,80 @@ def login_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-
             login(request, user)
 
             if user.is_superuser:
                 return redirect('/admin/')
 
             elif user.groups.filter(name='Manager').exists():
-                return redirect('manager_dashboard')
+                return redirect('home')
 
             elif user.groups.filter(name='Staff').exists():
-                return redirect('staff_dashboard')
+                return redirect('home')
 
             else:
-                return render(
-                    request,
-                    "accounts/login.html",
-                    {"error": "No role has been assigned to your account."}
-                )
+                return render(request, "accounts/login.html", {
+                    "error": "No role assigned"
+                })
 
-        else:
-            return render(
-                request,
-                "accounts/login.html",
-                {"error": "Invalid username or password"}
-            )
+        return render(request, "accounts/login.html", {
+            "error": "Invalid username or password"
+        })
 
     return render(request, "accounts/login.html")
 
 
+# -------------------------
+# DASHBOARD TEST VIEWS (OPTIONAL)
+# -------------------------
 @login_required
 def manager_dashboard(request):
-    return HttpResponse("Welcome Manager!")
+    return HttpResponse("Manager Dashboard")
 
 
 @login_required
 def staff_dashboard(request):
-    return HttpResponse("Welcome Staff!")
+    return HttpResponse("Staff Dashboard")
+
+
+# -------------------------
+# ADD PROPERTY
+# -------------------------
+@login_required
+def add_property(request):
+
+    if request.method == 'POST':
+        form = PropertyForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('add_property')
+
+    else:
+        form = PropertyForm()
+
+    # DASHBOARD STATS
+    total_properties = Property.objects.count()
+
+    total_units = Property.objects.aggregate(
+        total=models.Sum('total_units')
+    )['total'] or 0
+
+    occupied_units = Property.objects.aggregate(
+        total=models.Sum('occupied_units')
+    )['total'] or 0
+
+    vacant_units = total_units - occupied_units
+
+    context = {
+        'form': form,
+        'total_properties': total_properties,
+        'total_units': total_units,
+        'occupied_units': occupied_units,
+        'vacant_units': vacant_units,
+    }
+
+    return render(request, "property/add_property.html", context)
