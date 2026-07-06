@@ -9,10 +9,17 @@ from .forms import PropertyForm
 
 
 # -------------------------
-# HOME (DASHBOARD)
+# HOME (ROOT URL)
+# -------------------------
+def home(request):
+    return redirect('login')
+
+
+# -------------------------
+# DASHBOARD
 # -------------------------
 @login_required
-def home(request):
+def dashboard(request):
     return render(request, "dashboard/home.html")
 
 
@@ -26,40 +33,48 @@ def login_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
 
         if user is not None:
+
             login(request, user)
 
             if user.is_superuser:
                 return redirect('/admin/')
 
             elif user.groups.filter(name='Manager').exists():
-                return redirect('home')
+                return redirect('dashboard')
 
             elif user.groups.filter(name='Staff').exists():
-                return redirect('home')
+                return redirect('dashboard')
 
             else:
-                return render(request, "accounts/login.html", {
-                    "error": "No role assigned"
-                })
+                return redirect('dashboard')
 
-        return render(request, "accounts/login.html", {
-            "error": "Invalid username or password"
-        })
+        return render(
+            request,
+            "accounts/login.html",
+            {"error": "Invalid username or password"}
+        )
 
     return render(request, "accounts/login.html")
 
 
 # -------------------------
-# DASHBOARD TEST VIEWS (OPTIONAL)
+# MANAGER DASHBOARD
 # -------------------------
 @login_required
 def manager_dashboard(request):
     return HttpResponse("Manager Dashboard")
 
 
+# -------------------------
+# STAFF DASHBOARD
+# -------------------------
 @login_required
 def staff_dashboard(request):
     return HttpResponse("Staff Dashboard")
@@ -81,7 +96,6 @@ def add_property(request):
     else:
         form = PropertyForm()
 
-    # DASHBOARD STATS
     total_properties = Property.objects.count()
 
     total_units = Property.objects.aggregate(
@@ -102,4 +116,8 @@ def add_property(request):
         'vacant_units': vacant_units,
     }
 
-    return render(request, "property/add_property.html", context)
+    return render(
+        request,
+        "property/add_property.html",
+        context
+    )
