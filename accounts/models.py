@@ -10,35 +10,29 @@ class Property(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    property_type = models.CharField(
-        max_length=20,
-        choices=PROPERTY_TYPES
-    )
+    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES)
     address = models.TextField()
+
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='property_images/', null=True, blank=True)
 
     total_units = models.PositiveIntegerField(default=1)
     occupied_units = models.PositiveIntegerField(default=0)
 
-    monthly_rent = models.DecimalField(
-        max_digits=12,
-        decimal_places=2
-    )
+    monthly_rent = models.DecimalField(max_digits=12, decimal_places=2)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def vacant_units(self):
-        return self.total_units - self.occupied_units
-
     def __str__(self):
         return self.name
-    
-class Unit(models.Model):
 
+
+class Unit(models.Model):
     property = models.ForeignKey(
-    'accounts.Property',
-    on_delete=models.CASCADE,
-    related_name='units'
-)
+        Property,
+        on_delete=models.CASCADE,
+        related_name='units'
+    )
 
     unit_number = models.CharField(max_length=20)
 
@@ -56,7 +50,6 @@ class Unit(models.Model):
 
     def __str__(self):
         return f"{self.property.name} - {self.unit_number}"
-    
 
 class Client(models.Model):
 
@@ -103,28 +96,3 @@ class Lease(models.Model):
 
     def __str__(self):
         return f"{self.client} - {self.unit}"  
-class Property(models.Model):
-
-    PROPERTY_TYPES = [
-        ('APARTMENT', 'Apartment'),
-        ('RENTAL', 'Rental'),
-        ('CONDO', 'Condo'),
-    ]
-
-    name = models.CharField(max_length=100)
-    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES)
-    address = models.TextField()
-
-    description = models.TextField(null=True, blank=True)
-
-    image = models.ImageField(upload_to='property_images/', null=True, blank=True)
-
-    total_units = models.PositiveIntegerField(default=1)
-    occupied_units = models.PositiveIntegerField(default=0)
-
-    monthly_rent = models.DecimalField(max_digits=12, decimal_places=2)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name

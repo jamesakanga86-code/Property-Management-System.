@@ -3,8 +3,6 @@ from .models import Property, Unit
 from .models import Client
 from .models import Client, Unit, Lease
 
-
-
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
     list_display = (
