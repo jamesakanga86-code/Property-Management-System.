@@ -1,0 +1,23 @@
+.register-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
+}
+
+.register-btn:hover {
+    background: linear-gradient(135deg, #0b5ed7, #084298);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    color: #fff;
+}
+
+.register-btn:active {
+    transform: translateY(0);
+}

@@ -1,0 +1,37 @@
+<h2 class="text-center my-4">Available Properties</h2>
+
+<div class="container">
+    <div class="row">
+
+        {% for property in properties %}
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                {% if property.image %}
+                    <img src="{{ property.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5 class="card-title">{{ property.name }}</h5>
+
+                    <p class="card-text">
+                        {{ property.description|truncatewords:20 }}
+                    </p>
+
+                    <ul class="list-unstyled">
+                        <li><strong>Type:</strong> {{ property.property_type }}</li>
+                        <li><strong>Units:</strong> {{ property.total_units }}</li>
+                        <li><strong>Rent:</strong> {{ property.monthly_rent }}</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+</div>

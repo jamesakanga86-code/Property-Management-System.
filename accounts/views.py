@@ -3,11 +3,30 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import models
-
 from .models import Property
 from .forms import PropertyForm
+from django.contrib.auth.models import User, Group
+from .forms import ClientRegistrationForm
+from .models import Client
+from .models import Client, Property, Unit
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Lease
+from .models import Property
 
+@login_required
+def dashboard(request):
 
+    try:
+        lease = Lease.objects.get(client__user=request.user, is_active=True)
+    except Lease.DoesNotExist:
+        lease = None
+
+    context = {
+        "lease": lease
+    }
+
+    return render(request, "dashboard/home.html", context)
 # -------------------------
 # HOME (ROOT URL)
 # -------------------------
@@ -51,6 +70,9 @@ def login_view(request):
 
             elif user.groups.filter(name='Staff').exists():
                 return redirect('dashboard')
+            
+            elif user.groups.filter(name='Client').exists():
+                return redirect('client_dashboard')
 
             else:
                 return redirect('dashboard')
@@ -87,7 +109,7 @@ def staff_dashboard(request):
 def add_property(request):
 
     if request.method == 'POST':
-        form = PropertyForm(request.POST)
+        form = PropertyForm(request.POST, request.FILES)  # 👈 IMPORTANT
 
         if form.is_valid():
             form.save()
@@ -96,28 +118,108 @@ def add_property(request):
     else:
         form = PropertyForm()
 
-    total_properties = Property.objects.count()
+    return render(request, "property/add_property.html", {
+        "form": form
+    })
 
-    total_units = Property.objects.aggregate(
-        total=models.Sum('total_units')
-    )['total'] or 0
+from django.contrib.auth.models import User, Group
+from django.shortcuts import render, redirect
 
-    occupied_units = Property.objects.aggregate(
-        total=models.Sum('occupied_units')
-    )['total'] or 0
+def register_client(request):
 
-    vacant_units = total_units - occupied_units
+    if request.method == "POST":
 
-    context = {
-        'form': form,
-        'total_properties': total_properties,
-        'total_units': total_units,
-        'occupied_units': occupied_units,
-        'vacant_units': vacant_units,
-    }
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            return render(
+                request,
+                "accounts/register.html",
+                {"error": "Passwords do not match"}
+            )
+
+        if User.objects.filter(username=username).exists():
+            return render(
+                request,
+                "accounts/register.html",
+                {"error": "Username already exists"}
+            )
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password1,
+            first_name=first_name,
+            last_name=last_name
+        )
+        Client.objects.create(
+    user=user
+)
+
+        client_group, created = Group.objects.get_or_create(
+            name="Client"
+        )
+
+        user.groups.add(client_group)
+
+        return redirect("login")
+
+    return render(request, "accounts/register.html")
+@login_required
+def client_dashboard(request):
+
+    if not request.user.groups.filter(name='Client').exists():
+        return redirect('login')
 
     return render(
         request,
-        "property/add_property.html",
-        context
-    )
+        'client/dashboard.html'
+    
+    )@login_required
+def client_dashboard(request):
+
+    # get client profile for logged-in user
+    try:
+        client = request.user.client
+    except:
+        client = None
+
+    # BASIC STATS (from admin data)
+    total_properties = Property.objects.count()
+    total_units = Unit.objects.count()
+    vacant_units = Unit.objects.filter(status='VACANT').count()
+    occupied_units = Unit.objects.filter(status='OCCUPIED').count()
+
+    # CLIENT-SPECIFIC DATA (this is key)
+    client_units = Unit.objects.filter(
+        status='OCCUPIED'
+    )  # later we will link to lease
+
+    context = {
+        "client": client,
+        "total_properties": total_properties,
+        "total_units": total_units,
+        "vacant_units": vacant_units,
+        "occupied_units": occupied_units,
+        "client_units": client_units,
+    }
+
+    return render(request, "client/dashboard.html", context)
+    def property_list(request):
+     properties = Property.objects.all().order_by('-created_at')
+
+    return render(request, "property/property_list.html", {
+        "properties": properties
+    })
+@login_required
+def property_list(request):
+    properties = Property.objects.all().order_by('-created_at')
+
+    return render(request, "property/property_list.html", {
+        "properties": properties
+    })

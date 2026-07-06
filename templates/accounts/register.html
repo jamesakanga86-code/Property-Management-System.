@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Registration</title>
+    <style>
+        :root {
+            --ink: #1c2b3a;
+            --slate: #4a5a68;
+            --paper: #f7f5f0;
+            --line: #d8d2c4;
+            --accent: #8a6d3b;
+            --error: #a3402f;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--paper);
+            font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+            color: var(--ink);
+            padding: 40px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border: 1px solid var(--line);
+            padding: 48px 44px 40px;
+        }
+
+        .eyebrow {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin: 0 0 6px;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 500;
+            margin: 0 0 6px;
+            letter-spacing: 0.01em;
+        }
+
+        .sub {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            color: var(--slate);
+            margin: 0 0 32px;
+        }
+
+        form p {
+            margin: 0 0 20px;
+        }
+
+        label {
+            display: block;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--slate);
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 12px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            color: var(--ink);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 2px;
+            outline: none;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(138, 109, 59, 0.12);
+        }
+
+        .helptext {
+            display: block;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+            color: var(--slate);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        ul.errorlist {
+            list-style: none;
+            margin: 6px 0 0;
+            padding: 0;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+            color: var(--error);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 8px;
+            padding: 13px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+            background: var(--ink);
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--accent);
+        }
+
+        .login-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 13px;
+            color: var(--slate);
+            text-decoration: none;
+            border-top: 1px solid var(--line);
+            padding-top: 20px;
+        }
+
+        .login-link:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <p class="eyebrow">Client Portal</p>
+        <h2>Create Account</h2>
+        <p class="sub">Register below to access your client dashboard.</p>
+
+       <form method="POST">
+    {% csrf_token %}
+
+    {% if error %}
+        <ul class="errorlist">
+            <li>{{ error }}</li>
+        </ul>
+    {% endif %}
+
+    <p>
+        <label for="id_first_name">First Name</label>
+        <input type="text" name="first_name" id="id_first_name" required>
+    </p>
+
+    <p>
+        <label for="id_last_name">Last Name</label>
+        <input type="text" name="last_name" id="id_last_name" required>
+    </p>
+
+    <p>
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" required>
+        <span class="helptext">
+            Required. 150 characters or fewer.
+        </span>
+    </p>
+
+    <p>
+        <label for="id_email">Email Address</label>
+        <input type="email" name="email" id="id_email" required>
+    </p>
+
+    <p>
+        <label for="id_password1">Password</label>
+        <input type="password" name="password1" id="id_password1" required>
+        <span class="helptext">
+            Must contain at least 8 characters.
+        </span>
+    </p>
+
+    <p>
+        <label for="id_password2">Confirm Password</label>
+        <input type="password" name="password2" id="id_password2" required>
+        <span class="helptext">
+            Enter the same password again.
+        </span>
+    </p>
+
+    <button type="submit">
+        Register
+    </button>
+</form>
+          
+</body>
+</html>

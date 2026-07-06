@@ -1,5 +1,8 @@
 from django.contrib import admin
 from .models import Property, Unit
+from .models import Client
+from .models import Client, Unit, Lease
+
 
 
 @admin.register(Property)
@@ -39,3 +42,21 @@ class UnitAdmin(admin.ModelAdmin):
     list_filter = (
         'status',
     )
+@admin.register(Client)
+class ClientAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'phone_number',
+        'national_id'
+    )
+
+    search_fields = (
+        'user__username',
+        'user__first_name',
+        'user__last_name'
+    )
+from .models import Client, Unit, Lease
+
+@admin.register(Lease)
+class LeaseAdmin(admin.ModelAdmin):
+    list_display = ('client', 'unit', 'start_date', 'end_date', 'is_active')
