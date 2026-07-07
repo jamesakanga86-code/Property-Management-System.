@@ -1,24 +1,22 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import models
-from .models import Property
+
+from .models import Property, Unit, Client, Lease
 from .forms import PropertyForm
-from django.contrib.auth.models import User, Group
-from .forms import ClientRegistrationForm
-from .models import Client
-from .models import Client, Property, Unit
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Lease
-from .models import Property
+
 
 @login_required
 def dashboard(request):
 
     try:
-        lease = Lease.objects.get(client__user=request.user, is_active=True)
+        lease = Lease.objects.get(
+            client__user=request.user,
+            is_active=True
+        )
     except Lease.DoesNotExist:
         lease = None
 
@@ -26,22 +24,13 @@ def dashboard(request):
         "lease": lease
     }
 
-    return render(request, "dashboard/home.html", context)
-# -------------------------
-# HOME (ROOT URL)
-# -------------------------
+    return render(
+        request,
+        "dashboard/home.html",
+        context
+    )
 def home(request):
     return redirect('login')
-
-
-# -------------------------
-# DASHBOARD
-# -------------------------
-@login_required
-def dashboard(request):
-    return render(request, "dashboard/home.html")
-
-
 # -------------------------
 # LOGIN VIEW
 # -------------------------
@@ -122,8 +111,7 @@ def add_property(request):
         "form": form
     })
 
-from django.contrib.auth.models import User, Group
-from django.shortcuts import render, redirect
+
 
 def register_client(request):
 
@@ -218,8 +206,15 @@ def client_dashboard(request):
     })
 @login_required
 def property_list(request):
-    properties = Property.objects.all().order_by('-created_at')
 
-    return render(request, "property/property_list.html", {
-        "properties": properties
-    })
+    properties = Property.objects.all()
+
+    context = {
+        'properties': properties
+    }
+
+    return render(
+        request,
+        'property/property_list.html',
+        context
+    )

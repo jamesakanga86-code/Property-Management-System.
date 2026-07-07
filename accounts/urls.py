@@ -10,7 +10,8 @@ urlpatterns = [
     path('add-property/', views.add_property, name='add_property'),
     path('register/', views.register_client, name='register'),
     path('client/dashboard/',views.client_dashboard,name='client_dashboard'),
-    path('properties/', views.property_list, name='property_list'),     
+    path('properties/', views.property_list, name='property_list'), 
+    path('properties/',views.property_list,name='property_list'),    
 ]
 
 
