@@ -3,37 +3,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.db import models
 
 from .models import Property, Unit, Client, Lease
 from .forms import PropertyForm
 
 
-@login_required
-def dashboard(request):
-
-    try:
-        lease = Lease.objects.get(
-            client__user=request.user,
-            is_active=True
-        )
-    except Lease.DoesNotExist:
-        lease = None
-
-    context = {
-        "lease": lease
-    }
-
-    return render(
-        request,
-        "dashboard/home.html",
-        context
-    )
+# ==========================
+# HOME
+# ==========================
 def home(request):
-    return redirect('login')
-# -------------------------
-# LOGIN VIEW
-# -------------------------
+    return redirect("login")
+
+
+# ==========================
+# LOGIN
+# ==========================
 def login_view(request):
 
     if request.method == "POST":
@@ -52,67 +36,145 @@ def login_view(request):
             login(request, user)
 
             if user.is_superuser:
-                return redirect('/admin/')
+                return redirect("/admin/")
 
-            elif user.groups.filter(name='Manager').exists():
-                return redirect('dashboard')
+            elif user.groups.filter(name="Manager").exists():
+                return redirect("dashboard")
 
-            elif user.groups.filter(name='Staff').exists():
-                return redirect('dashboard')
-            
-            elif user.groups.filter(name='Client').exists():
-                return redirect('client_dashboard')
+            elif user.groups.filter(name="Staff").exists():
+                return redirect("dashboard")
 
+            elif user.groups.filter(name="Client").exists():
+                return redirect("property_list")
             else:
-                return redirect('dashboard')
+                return redirect("dashboard")
 
         return render(
             request,
             "accounts/login.html",
-            {"error": "Invalid username or password"}
+            {
+                "error": "Invalid username or password"
+            }
         )
 
     return render(request, "accounts/login.html")
 
 
-# -------------------------
+# ==========================
+# MAIN DASHBOARD
+# ==========================
+@login_required
+def dashboard(request):
+
+    lease = Lease.objects.filter(
+        client__user=request.user,
+        is_active=True
+    ).first()
+
+    context = {
+        "lease": lease
+    }
+
+    return render(
+        request,
+        "dashboard/home.html",
+        context
+    )
+
+
+# ==========================
 # MANAGER DASHBOARD
-# -------------------------
+# ==========================
 @login_required
 def manager_dashboard(request):
     return HttpResponse("Manager Dashboard")
 
 
-# -------------------------
+# ==========================
 # STAFF DASHBOARD
-# -------------------------
+# ==========================
 @login_required
 def staff_dashboard(request):
     return HttpResponse("Staff Dashboard")
 
 
-# -------------------------
+# ==========================
+# CLIENT DASHBOARD
+# ==========================
+@login_required
+def client_dashboard(request):
+
+    if not request.user.groups.filter(name="Client").exists():
+        return redirect("login")
+
+    client = Client.objects.filter(user=request.user).first()
+
+    context = {
+        "client": client
+    }
+
+    return render(
+        request,
+        "client/dashboard.html",
+        context
+    )
+
+
+# ==========================
+# PROPERTY LIST
+# ==========================
+@login_required
+def property_list(request):
+
+    properties = Property.objects.all().order_by("-created_at")
+
+    return render(
+        request,
+        "property/property_list.html",
+        {
+            "properties": properties
+        }
+    )
+
+# ==========================
 # ADD PROPERTY
-# -------------------------
+# ==========================
 @login_required
 def add_property(request):
 
-    if request.method == 'POST':
-        form = PropertyForm(request.POST, request.FILES)  # 👈 IMPORTANT
+    if request.method == "POST":
+
+        form = PropertyForm(
+            request.POST,
+            request.FILES
+        )
 
         if form.is_valid():
-            form.save()
-            return redirect('add_property')
+
+            property = form.save(commit=False)
+
+            # Uncomment this after adding manager field
+            # property.manager = request.user
+
+            property.save()
+
+            return redirect("add_property")
 
     else:
         form = PropertyForm()
 
-    return render(request, "property/add_property.html", {
-        "form": form
-    })
+    return render(
+        request,
+        "property/add_property.html",
+        {
+            "form": form
+        }
+    )
 
 
-
+# ==========================
+# CLIENT REGISTRATION
+# ==========================
 def register_client(request):
 
     if request.method == "POST":
@@ -125,17 +187,23 @@ def register_client(request):
         password2 = request.POST.get("password2")
 
         if password1 != password2:
+
             return render(
                 request,
                 "accounts/register.html",
-                {"error": "Passwords do not match"}
+                {
+                    "error": "Passwords do not match"
+                }
             )
 
         if User.objects.filter(username=username).exists():
+
             return render(
                 request,
                 "accounts/register.html",
-                {"error": "Username already exists"}
+                {
+                    "error": "Username already exists"
+                }
             )
 
         user = User.objects.create_user(
@@ -143,11 +211,10 @@ def register_client(request):
             email=email,
             password=password1,
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
         )
-        Client.objects.create(
-    user=user
-)
+
+        Client.objects.create(user=user)
 
         client_group, created = Group.objects.get_or_create(
             name="Client"
@@ -157,64 +224,7 @@ def register_client(request):
 
         return redirect("login")
 
-    return render(request, "accounts/register.html")
-@login_required
-def client_dashboard(request):
-
-    if not request.user.groups.filter(name='Client').exists():
-        return redirect('login')
-
     return render(
         request,
-        'client/dashboard.html'
-    
-    )@login_required
-def client_dashboard(request):
-
-    # get client profile for logged-in user
-    try:
-        client = request.user.client
-    except:
-        client = None
-
-    # BASIC STATS (from admin data)
-    total_properties = Property.objects.count()
-    total_units = Unit.objects.count()
-    vacant_units = Unit.objects.filter(status='VACANT').count()
-    occupied_units = Unit.objects.filter(status='OCCUPIED').count()
-
-    # CLIENT-SPECIFIC DATA (this is key)
-    client_units = Unit.objects.filter(
-        status='OCCUPIED'
-    )  # later we will link to lease
-
-    context = {
-        "client": client,
-        "total_properties": total_properties,
-        "total_units": total_units,
-        "vacant_units": vacant_units,
-        "occupied_units": occupied_units,
-        "client_units": client_units,
-    }
-
-    return render(request, "client/dashboard.html", context)
-    def property_list(request):
-     properties = Property.objects.all().order_by('-created_at')
-
-    return render(request, "property/property_list.html", {
-        "properties": properties
-    })
-@login_required
-def property_list(request):
-
-    properties = Property.objects.all()
-
-    context = {
-        'properties': properties
-    }
-
-    return render(
-        request,
-        'property/property_list.html',
-        context
+        "accounts/register.html"
     )
