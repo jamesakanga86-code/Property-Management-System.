@@ -5,6 +5,46 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def ensure_property_schema(apps, schema_editor):
+    from accounts.models import Property as CurrentProperty
+    from django.contrib.auth import get_user_model
+
+    Property = apps.get_model('accounts', 'Property')
+    User = get_user_model()
+
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute("SHOW COLUMNS FROM accounts_property")
+        columns = {row[0] for row in cursor.fetchall()}
+
+    for field_name in ['bathrooms', 'bedrooms', 'square_feet', 'status']:
+        if field_name in columns:
+            field = Property._meta.get_field(field_name)
+            schema_editor.remove_field(Property, field)
+
+    for field_name, default in [('city', 'Kampala'), ('district', 'Central')]:
+        if field_name not in columns:
+            field = Property._meta.get_field(field_name)
+            field.default = default
+            schema_editor.add_field(Property, field)
+
+    for field_name, default in [('featured', False), ('is_available', True)]:
+        if field_name not in columns:
+            field = Property._meta.get_field(field_name)
+            field.default = default
+            schema_editor.add_field(Property, field)
+
+    if 'manager_id' not in columns:
+        manager_field = CurrentProperty._meta.get_field('manager')
+        manager_field.blank = True
+        manager_field.null = True
+        schema_editor.add_field(CurrentProperty, manager_field)
+
+        first_user = User.objects.order_by('id').first()
+        if first_user is not None:
+            with schema_editor.connection.cursor() as cursor:
+                cursor.execute("UPDATE accounts_property SET manager_id = %s WHERE manager_id IS NULL", [first_user.pk])
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,58 +53,64 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='property',
-            name='bathrooms',
-        ),
-        migrations.RemoveField(
-            model_name='property',
-            name='bedrooms',
-        ),
-        migrations.RemoveField(
-            model_name='property',
-            name='square_feet',
-        ),
-        migrations.RemoveField(
-            model_name='property',
-            name='status',
-        ),
-        migrations.AddField(
-            model_name='property',
-            name='city',
-            field=models.CharField(default='Kampala', max_length=100),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='property',
-            name='district',
-            field=models.CharField(default='Central', max_length=100),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='property',
-            name='featured',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='property',
-            name='is_available',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='property',
-            name='manager',
-            field=models.ForeignKey(default='Akanga', on_delete=django.db.models.deletion.CASCADE, related_name='managed_properties', to=settings.AUTH_USER_MODEL),
-            preserve_default=False,
-        ),
-        migrations.AlterField(
-            model_name='property',
-            name='description',
-            field=models.TextField(blank=True),
-        ),
-        migrations.AlterField(
-            model_name='property',
-            name='property_type',
-            field=models.CharField(choices=[('APARTMENT', 'Apartment'), ('RENTAL', 'Rental'), ('CONDO', 'Condo')], max_length=20),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(ensure_property_schema, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='property',
+                    name='bathrooms',
+                ),
+                migrations.RemoveField(
+                    model_name='property',
+                    name='bedrooms',
+                ),
+                migrations.RemoveField(
+                    model_name='property',
+                    name='square_feet',
+                ),
+                migrations.RemoveField(
+                    model_name='property',
+                    name='status',
+                ),
+                migrations.AddField(
+                    model_name='property',
+                    name='city',
+                    field=models.CharField(default='Kampala', max_length=100),
+                    preserve_default=False,
+                ),
+                migrations.AddField(
+                    model_name='property',
+                    name='district',
+                    field=models.CharField(default='Central', max_length=100),
+                    preserve_default=False,
+                ),
+                migrations.AddField(
+                    model_name='property',
+                    name='featured',
+                    field=models.BooleanField(default=False),
+                ),
+                migrations.AddField(
+                    model_name='property',
+                    name='is_available',
+                    field=models.BooleanField(default=True),
+                ),
+                migrations.AddField(
+                    model_name='property',
+                    name='manager',
+                    field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='managed_properties', to=settings.AUTH_USER_MODEL),
+                ),
+                migrations.AlterField(
+                    model_name='property',
+                    name='description',
+                    field=models.TextField(blank=True),
+                ),
+                migrations.AlterField(
+                    model_name='property',
+                    name='property_type',
+                    field=models.CharField(choices=[('APARTMENT', 'Apartment'), ('RENTAL', 'Rental'), ('CONDO', 'Condo')], max_length=20),
+                ),
+            ],
         ),
     ]
