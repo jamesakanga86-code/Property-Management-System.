@@ -58,6 +58,16 @@ class PropertyApplication(models.Model):
         related_name='applications'
     )
 
+    phone_number = models.CharField(
+    max_length=20
+)
+
+    national_id = models.CharField(
+    max_length=50,
+    blank=True,
+    null=True
+)
+
     property = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,

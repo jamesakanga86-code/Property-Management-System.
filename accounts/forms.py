@@ -37,9 +37,11 @@ class PropertyApplicationForm(forms.ModelForm):
         model = PropertyApplication
 
         fields = [
-            "move_in_date",
-            "message",
-        ]
+    "move_in_date",
+    "phone_number",
+    "national_id",
+    "message",
+]
 
         widgets = {
             "move_in_date": forms.DateInput(

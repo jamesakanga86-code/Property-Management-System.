@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Property Applications{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>
+            📥 Property Applications
+        </h2>
+
+        <span class="badge bg-primary fs-6">
+            {{ applications|length }} Applications
+        </span>
+
+    </div>
+
+    {% if applications %}
+
+        {% for application in applications %}
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-8">
+
+                        <h4 class="fw-bold">
+
+                            {{ application.property.name }}
+
+                        </h4>
+
+                        <p class="mb-1">
+                            <strong>Applicant:</strong>
+                            {{ application.client.user.get_full_name }}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Username:</strong>
+                            {{ application.client.user.username }}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Move-in Date:</strong>
+                            {{ application.move_in_date }}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Applied:</strong>
+                            {{ application.applied_at|date:"d M Y H:i" }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-4 text-end">
+
+                        {% if application.status == "PENDING" %}
+                            <span class="badge bg-warning text-dark fs-6">
+                                Pending
+                            </span>
+
+                        {% elif application.status == "APPROVED" %}
+                            <span class="badge bg-success fs-6">
+                                Approved
+                            </span>
+
+                        {% else %}
+                            <span class="badge bg-danger fs-6">
+                                Rejected
+                            </span>
+
+                        {% endif %}
+
+                        <br><br>
+
+                        <a href="#"
+                           class="btn btn-primary">
+
+                            View Application
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="alert alert-info">
+
+            No applications received yet.
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

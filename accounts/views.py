@@ -289,7 +289,9 @@ def apply_property(request, property_id):
             application.manager = property.manager
 
             application.save()
-
+            messages.success( request,
+                               "Your application has been submitted successfully."
+)
             return redirect("property_detail", property_id=property.id)
 
     else:
@@ -302,5 +304,19 @@ def apply_property(request, property_id):
         {
             "form": form,
             "property": property,
+        }
+    )
+@login_required
+def manager_applications(request):
+
+    applications = PropertyApplication.objects.filter(
+        manager=request.user
+    ).order_by("-applied_at")
+
+    return render(
+        request,
+        "manager/applications.html",
+        {
+            "applications": applications
         }
     )

@@ -14,6 +14,7 @@ urlpatterns = [
     path('properties/', views.property_list, name='property_list'),
     path('property/<int:property_id>/', views.property_detail, name='property_detail'),
     path('property/<int:property_id>/apply/', views.apply_property, name='apply_property'),
+    path("manager/applications/",views.manager_applications,name="manager_applications"),
 ]
 
 
