@@ -3,52 +3,36 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-
 from .models import Property, Unit, Client, Lease
 from .forms import PropertyForm
 
 
-# ==========================
 # HOME
-# ==========================
 def home(request):
     return redirect("login")
-
-
-# ==========================
-# LOGIN
-# ==========================
+# LOGIN-PANNEL.
 def login_view(request):
 
     if request.method == "POST":
-
         username = request.POST.get("username")
         password = request.POST.get("password")
-
         user = authenticate(
             request,
-            username=username,
+            username=username,\
             password=password
         )
-
         if user is not None:
-
             login(request, user)
-
             if user.is_superuser:
                 return redirect("/admin/")
-
             elif user.groups.filter(name="Manager").exists():
                 return redirect("dashboard")
-
             elif user.groups.filter(name="Staff").exists():
                 return redirect("dashboard")
-
             elif user.groups.filter(name="Client").exists():
                 return redirect("property_list")
             else:
                 return redirect("dashboard")
-
         return render(
             request,
             "accounts/login.html",
@@ -56,51 +40,27 @@ def login_view(request):
                 "error": "Invalid username or password"
             }
         )
-
     return render(request, "accounts/login.html")
 
-
-# ==========================
 # MAIN DASHBOARD
-# ==========================
 @login_required
 def dashboard(request):
 
-    lease = Lease.objects.filter(
-        client__user=request.user,
-        is_active=True
-    ).first()
+    lease = Lease.objects.filter(client__user=request.user,is_active=True).first()
+    context = {"lease": lease}
+    return render(request,"dashboard/home.html",context)
 
-    context = {
-        "lease": lease
-    }
-
-    return render(
-        request,
-        "dashboard/home.html",
-        context
-    )
-
-
-# ==========================
 # MANAGER DASHBOARD
-# ==========================
 @login_required
 def manager_dashboard(request):
     return HttpResponse("Manager Dashboard")
 
-
-# ==========================
 # STAFF DASHBOARD
-# ==========================
 @login_required
 def staff_dashboard(request):
     return HttpResponse("Staff Dashboard")
 
-
-# ==========================
 # CLIENT DASHBOARD
-# ==========================
 @login_required
 def client_dashboard(request):
 
@@ -108,25 +68,14 @@ def client_dashboard(request):
         return redirect("login")
 
     client = Client.objects.filter(user=request.user).first()
+    context = {"client": client}
+    return render( request,"client/dashboard.html",context)
 
-    context = {
-        "client": client
-    }
-
-    return render(
-        request,
-        "client/dashboard.html",
-        context
-    )
-
-
-# ==========================
 # PROPERTY LIST
-# ==========================
 @login_required
 def property_list(request):
 
-    properties = Property.objects.all().order_by("-created_at")
+    properties = Property.objects.filter(is_available=True)
 
     return render(
         request,
@@ -136,9 +85,7 @@ def property_list(request):
         }
     )
 
-# ==========================
 # ADD PROPERTY
-# ==========================
 @login_required
 def add_property(request):
 
@@ -152,10 +99,6 @@ def add_property(request):
         if form.is_valid():
 
             property = form.save(commit=False)
-
-            # Uncomment this after adding manager field
-            # property.manager = request.user
-
             property.save()
 
             return redirect("add_property")
@@ -172,9 +115,8 @@ def add_property(request):
     )
 
 
-# ==========================
+
 # CLIENT REGISTRATION
-# ==========================
 def register_client(request):
 
     if request.method == "POST":
@@ -216,9 +158,7 @@ def register_client(request):
 
         Client.objects.create(user=user)
 
-        client_group, created = Group.objects.get_or_create(
-            name="Client"
-        )
+        client_group, created = Group.objects.get_or_create(name="Client")
 
         user.groups.add(client_group)
 
