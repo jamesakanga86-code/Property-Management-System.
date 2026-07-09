@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3 class="mb-0">
+                        Apply for {{ property.name }}
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Preferred Move-in Date
+                            </label>
+
+                            {{ form.move_in_date }}
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Message to the Property Manager
+                            </label>
+
+                            {{ form.message }}
+
+                        </div>
+
+                        <button
+                            class="btn btn-primary">
+
+                            Submit Application
+
+                        </button>
+
+                        <a href="{% url 'property_detail' property.id %}"
+                           class="btn btn-secondary">
+
+                            Cancel
+
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,185 +1,525 @@
 {% extends "base.html" %}
-
 {% block content %}
-
-<div class="container my-5">
-
-<div class="card shadow-lg border-0">
-
-{% if property.image %}
-<img
-    id="mainImage"
-    src="{{ property.image.url }}"
-    class="img-fluid rounded mb-4"
-    style="width:100%;height:500px;object-fit:cover;">
-{% endif %}
-
-<div class="row mt-3">
-
-{% for photo in gallery %}
-
-<div class="col-3 mb-3">
-
-<img
-    src="{{ photo.image.url }}"
-    class="img-fluid rounded shadow-sm gallery-thumb"
-    style="height:120px;width:100%;object-fit:cover;cursor:pointer;"
-    onclick="changeImage(this)">
-
-</div>
-
-{% endfor %}
-
-</div>
-
-
-<div class="card-body">
-
-<div class="d-flex justify-content-between align-items-center">
-
-<div>
-
-<h2 class="fw-bold">
-
-{{ property.name }}
-
-</h2>
-
-<p class="text-muted">
-
-{{ property.city }}, {{ property.district }}
-
-</p>
-
-</div>
-
-{% if property.featured %}
-
-<span class="badge bg-warning text-dark fs-6">
-Featured
-
-</span>
-
-{% endif %}
-
-</div>
-
-<hr>
-
-<div class="row">
-
-<div class="col-md-6">
-
-<h4 class="text-success">
-
-UGX {{ property.monthly_rent }}/Month
-
-</h4>
-
-<p>
-
-<strong>Property Type:</strong>
-
-{{ property.property_type }}
-
-</p>
-
-<p>
-
-<strong>Available Units:</strong>
-
-{{ property.vacant_units }}
-
-</p>
-
-<p>
-
-<strong>Address:</strong>
-
-{{ property.address }}
-
-</p>
-<p>
-
-<strong>Managed By:</strong>
-
-{{ property.manager.get_full_name }}
-
-</p>
-
-</div>
-
-<div class="col-md-6">
-
-<h5>Description</h5>
-
-<p>
-
-{{ property.description }}
-
-</p>
-
-</div>
-
-</div>
-
-<hr>
-
-<div class="row text-center">
-
-<div class="col-md-4 mb-3">
-
-<a href="#"
-
-class="btn btn-primary w-100">
-
-Apply For Property
-
-</a>
-
-</div>
-
-<div class="col-md-4 mb-3">
-
-<a href="#"
-
-class="btn btn-success w-100">
-
-Book Viewing
-
-</a>
-
-</div>
-
-<div class="col-md-4 mb-3">
-
-<a href="#"
-
-class="btn btn-dark w-100">
-
-Contact Manager
-
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<script>
-
-function changeImage(image){
-
-    document.getElementById("mainImage").src = image.src;
-
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+.detail-wrap *{
+    box-sizing:border-box;
 }
 
+body{
+    background:#F4F5F7;
+    font-family:'Inter',sans-serif;
+}
+
+.brand-bar{
+    text-align:center;
+    padding:22px 0 18px;
+    border-bottom:1px solid #E4E7EC;
+    margin-bottom:32px;
+}
+.brand-bar .brand-name{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:22px;
+    color:#152A4E;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+.brand-bar .brand-name span{
+    color:#C9A227;
+}
+.brand-bar .brand-tagline{
+    color:#8B94A3;
+    font-size:11.5px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:3px;
+}
+
+.detail-card{
+    background:#FFFFFF;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid #EAECEF;
+    box-shadow:0 1px 3px rgba(21,42,78,.06),0 10px 28px rgba(21,42,78,.08);
+}
+
+.slideshow{
+    position:relative;
+    height:460px;
+    overflow:hidden;
+    cursor:zoom-in;
+    background:#0F1B30;
+}
+.slide{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity 1s ease;
+}
+.slide.active{
+    opacity:1;
+}
+.slide img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.slideshow::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(21,42,78,0) 65%,rgba(21,42,78,.45) 100%);
+    pointer-events:none;
+    z-index:2;
+}
+.expand-hint{
+    position:absolute;
+    bottom:16px;
+    right:16px;
+    background:rgba(21,42,78,.75);
+    color:#FFFFFF;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:20px;
+    z-index:3;
+    pointer-events:none;
+}
+.slide-dots{
+    position:absolute;
+    bottom:16px;
+    left:16px;
+    display:flex;
+    gap:8px;
+    z-index:3;
+}
+.slide-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:rgba(255,255,255,.45);
+    cursor:pointer;
+    transition:background .25s ease,transform .25s ease;
+}
+.slide-dot.active{
+    background:#C9A227;
+    transform:scale(1.25);
+}
+.slide-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(21,42,78,.5);
+    border:none;
+    color:#FFFFFF;
+    font-size:22px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    cursor:pointer;
+    z-index:3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .2s ease;
+}
+.slide-arrow:hover{
+    background:rgba(201,162,39,.85);
+}
+.slide-arrow-prev{ left:16px; }
+.slide-arrow-next{ right:16px; }
+
+.lightbox{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,16,28,.94);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+}
+.lightbox.active{
+    display:flex;
+}
+.lightbox-img{
+    max-width:90vw;
+    max-height:85vh;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    border-radius:6px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.lightbox-close{
+    position:absolute;
+    top:24px;
+    right:32px;
+    color:#FFFFFF;
+    font-size:32px;
+    font-weight:300;
+    cursor:pointer;
+    line-height:1;
+    background:none;
+    border:none;
+    padding:8px;
+}
+.lightbox-close:hover{
+    color:#C9A227;
+}
+.lightbox-nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(255,255,255,.1);
+    border:none;
+    color:#FFFFFF;
+    font-size:26px;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    cursor:pointer;
+    transition:background .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.lightbox-nav:hover{
+    background:rgba(201,162,39,.85);
+}
+.lightbox-prev{ left:24px; }
+.lightbox-next{ right:24px; }
+.lightbox-counter{
+    position:absolute;
+    bottom:26px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#D8DCE3;
+    font-size:12.5px;
+    letter-spacing:.6px;
+}
+
+@media (max-width:768px){
+    .lightbox-nav{width:42px;height:42px;font-size:20px;}
+    .lightbox-prev{left:10px;}
+    .lightbox-next{right:10px;}
+    .lightbox-close{top:14px;right:16px;font-size:28px;}
+}
+
+.detail-body{
+    padding:32px;
+}
+
+.detail-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    flex-wrap:wrap;
+}
+.detail-header h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:32px;
+    color:#152A4E;
+    margin-bottom:6px;
+}
+.detail-header .location{
+    color:#7A8493;
+    font-size:14.5px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.detail-header .location::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#C9A227;
+    flex-shrink:0;
+}
+.featured-badge{
+    background:#C9A227;
+    color:#FFFFFF;
+    padding:7px 16px;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+    white-space:nowrap;
+}
+
+.detail-divider{
+    border:none;
+    border-top:1px solid #EEF0F3;
+    margin:26px 0;
+}
+
+.info-col p{
+    font-size:14.5px;
+    color:#3F4654;
+    margin-bottom:12px;
+    line-height:1.6;
+}
+.info-col p strong{
+    color:#152A4E;
+    font-weight:600;
+    margin-right:4px;
+}
+
+.price-tag{
+    color:#1F6E4F;
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:18px;
+}
+.price-tag span{
+    display:block;
+    font-size:11.5px;
+    color:#8B94A3;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    margin-bottom:2px;
+}
+
+.desc-col h5{
+    font-family:'Fraunces',serif;
+    font-size:16px;
+    font-weight:600;
+    color:#152A4E;
+    margin-bottom:10px;
+}
+.desc-col p{
+    font-size:14.5px;
+    color:#5B6472;
+    line-height:1.75;
+}
+
+.action-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+}
+.btn-action{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:14px 0;
+    border-radius:6px;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    text-decoration:none;
+    transition:background .25s ease,color .25s ease;
+}
+.btn-apply{
+    background:#152A4E;
+    color:#FFFFFF;
+}
+.btn-apply:hover{
+    background:#C9A227;
+    color:#FFFFFF;
+}
+.btn-viewing{
+    background:#FFFFFF;
+    color:#1F6E4F;
+    border:1.5px solid #1F6E4F;
+}
+.btn-viewing:hover{
+    background:#1F6E4F;
+    color:#FFFFFF;
+}
+.btn-contact{
+    background:#FFFFFF;
+    color:#152A4E;
+    border:1.5px solid #152A4E;
+}
+.btn-contact:hover{
+    background:#152A4E;
+    color:#FFFFFF;
+}
+
+@media (max-width:768px){
+    .detail-body{padding:22px;}
+    .action-row{grid-template-columns:1fr;}
+    .slideshow{height:300px;}
+}
+</style>
+
+<div class="container my-5 detail-wrap">
+    <div class="brand-bar">
+        <div class="brand-name">AVC <span>Consultants</span> Ltd.</div>
+        <div class="brand-tagline">Property Management &amp; Real Estate Advisory</div>
+    </div>
+
+    <div class="detail-card">
+        <div class="slideshow" id="slideshow">
+            <button class="slide-arrow slide-arrow-prev" onclick="event.stopPropagation(); shiftSlide(-1)">&#8249;</button>
+            <button class="slide-arrow slide-arrow-next" onclick="event.stopPropagation(); shiftSlide(1)">&#8250;</button>
+            <span class="expand-hint">Tap to view full size</span>
+            <div class="slide-dots" id="slideDots"></div>
+        </div>
+
+        <div class="detail-body">
+            <div class="detail-header">
+                <div>
+                    <h2>{{ property.name }}</h2>
+                    <p class="location">{{ property.city }}, {{ property.district }}</p>
+                </div>
+                {% if property.featured %}
+                <span class="featured-badge">Featured</span>
+                {% endif %}
+            </div>
+
+            <hr class="detail-divider">
+
+            <div class="row">
+                <div class="col-md-6 info-col">
+                    <div class="price-tag">
+                        <span>Monthly Rent</span>
+                        UGX {{ property.monthly_rent }}
+                    </div>
+                    <p><strong>Property Type:</strong> {{ property.property_type }}</p>
+                    <p><strong>Available Units:</strong> {{ property.vacant_units }}</p>
+                    <p><strong>Address:</strong> {{ property.address }}</p>
+                    <p><strong>Managed By:</strong> {{ property.manager.get_full_name }}</p>
+                </div>
+                <div class="col-md-6 desc-col">
+                    <h5>Description</h5>
+                    <p>{{ property.description }}</p>
+                </div>
+            </div>
+
+            <hr class="detail-divider">
+
+            <div class="action-row">
+                <a href="{% url 'apply_property' property.id %}" class="btn-action btn-apply">
+                    Apply For Property
+                </a>
+                <a href="#" class="btn-action btn-viewing">
+                    Book Viewing
+                </a>
+                <a href="#" class="btn-action btn-contact">
+                    Contact Manager
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)">&#8249;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">&#8250;</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
+{{ gallery_urls|json_script:"gallery-data" }}
+<script>
+var galleryImages = JSON.parse(document.getElementById('gallery-data').textContent);
+var currentIndex = 0;
+var slideIndex = 0;
+var autoplayTimer = null;
+var AUTOPLAY_DELAY = 4000;
+
+function buildSlideshow(){
+    var slideshow = document.getElementById("slideshow");
+    var dotsWrap = document.getElementById("slideDots");
+    if(galleryImages.length === 0) return;
+
+    galleryImages.forEach(function(url, i){
+        var slide = document.createElement("div");
+        slide.className = "slide" + (i === 0 ? " active" : "");
+        slide.setAttribute("data-index", i);
+        var img = document.createElement("img");
+        img.src = url;
+        slide.appendChild(img);
+        slideshow.insertBefore(slide, slideshow.firstChild);
+
+        var dot = document.createElement("span");
+        dot.className = "slide-dot" + (i === 0 ? " active" : "");
+        dot.onclick = function(e){ e.stopPropagation(); goToSlide(i); };
+        dotsWrap.appendChild(dot);
+    });
+
+    slideshow.addEventListener("click", function(){
+        openLightbox(slideIndex);
+    });
+
+    startAutoplay();
+}
+
+function goToSlide(index){
+    var slides = document.querySelectorAll("#slideshow .slide");
+    var dots = document.querySelectorAll("#slideDots .slide-dot");
+    slides[slideIndex].classList.remove("active");
+    dots[slideIndex].classList.remove("active");
+    slideIndex = (index + galleryImages.length) % galleryImages.length;
+    slides[slideIndex].classList.add("active");
+    dots[slideIndex].classList.add("active");
+}
+
+function shiftSlide(direction){
+    goToSlide(slideIndex + direction);
+    restartAutoplay();
+}
+
+function startAutoplay(){
+    autoplayTimer = setInterval(function(){
+        goToSlide(slideIndex + 1);
+    }, AUTOPLAY_DELAY);
+}
+
+function restartAutoplay(){
+    clearInterval(autoplayTimer);
+    startAutoplay();
+}
+
+function openLightbox(index){
+    currentIndex = index;
+    updateLightbox();
+    document.getElementById("lightbox").classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+function closeLightbox(){
+    document.getElementById("lightbox").classList.remove("active");
+    document.body.style.overflow = "";
+}
+
+function navLightbox(direction){
+    currentIndex = (currentIndex + direction + galleryImages.length) % galleryImages.length;
+    updateLightbox();
+}
+
+function updateLightbox(){
+    document.getElementById("lightboxImg").src = galleryImages[currentIndex];
+    document.getElementById("lightboxCounter").textContent = (currentIndex + 1) + " / " + galleryImages.length;
+}
+
+document.addEventListener("keydown", function(e){
+    var lb = document.getElementById("lightbox");
+    if(!lb.classList.contains("active")) return;
+    if(e.key === "Escape") closeLightbox();
+    if(e.key === "ArrowLeft") navLightbox(-1);
+    if(e.key === "ArrowRight") navLightbox(1);
+});
+
+document.getElementById("lightbox").addEventListener("click", function(e){
+    if(e.target === this) closeLightbox();
+});
+
+buildSlideshow();
 </script>
-
-
 {% endblock %}
-

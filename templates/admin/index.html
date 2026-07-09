@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <div class="module">
+    <h2>Quick Links</h2>
+    <ul>
+      <li><a href="{% url 'property_list' %}">View Site.</a></li>
+    </ul>
+  </div>
+  {{ block.super }}
+{% endblock %}

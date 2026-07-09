@@ -1,195 +1,316 @@
 {% extends "base.html" %}
-
 {% block content %}
-
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+.property-grid *{
+    box-sizing:border-box;
+}
+
 body{
-    background:#f5f7fa;
+    background:#F4F5F7;
+    font-family:'Inter',sans-serif;
+}
+
+.brand-bar{
+    text-align:center;
+    padding:22px 0 18px;
+    border-bottom:1px solid #E4E7EC;
+    margin-bottom:8px;
+}
+.brand-bar .brand-name{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:22px;
+    color:#152A4E;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+.brand-bar .brand-name span{
+    color:#C9A227;
+}
+.brand-bar .brand-tagline{
+    color:#8B94A3;
+    font-size:11.5px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:3px;
 }
 
 .page-title{
     text-align:center;
-    margin:35px 0;
+    margin:40px 0 40px;
 }
-
 .page-title h2{
-    font-weight:700;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:38px;
+    color:#152A4E;
+    letter-spacing:-.5px;
+    margin-bottom:6px;
+}
+.page-title p{
+    color:#6B7280;
+    font-size:15px;
+    letter-spacing:.3px;
 }
 
 .property-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:30px;
+    gap:32px;
 }
 
 .property-card{
-    background:white;
-    border-radius:14px;
+    background:#FFFFFF;
+    border-radius:10px;
     overflow:hidden;
-    box-shadow:0 8px 24px rgba(0,0,0,.08);
-    transition:.3s;
+    box-shadow:0 1px 3px rgba(21,42,78,.06),0 8px 20px rgba(21,42,78,.06);
+    border:1px solid #EAECEF;
+    transition:transform .35s ease,box-shadow .35s ease;
+    display:flex;
+    flex-direction:column;
+    position:relative;
 }
-
 .property-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 14px 35px rgba(0,0,0,.15);
+    transform:translateY(-5px);
+    box-shadow:0 4px 10px rgba(21,42,78,.08),0 18px 32px rgba(21,42,78,.14);
 }
 
+.property-image-wrap{
+    position:relative;
+    height:230px;
+    overflow:hidden;
+}
 .property-image{
     width:100%;
-    height:230px;
+    height:100%;
     object-fit:cover;
+    display:block;
+    transition:transform .5s ease;
 }
-
-.property-body{
-    padding:20px;
+.property-card:hover .property-image{
+    transform:scale(1.05);
+}
+.property-image-wrap::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(21,42,78,0) 55%,rgba(21,42,78,.55) 100%);
+    pointer-events:none;
 }
 
 .badges{
+    position:absolute;
+    top:14px;
+    left:14px;
+    right:14px;
     display:flex;
     justify-content:space-between;
-    margin-bottom:15px;
+    z-index:2;
 }
-
 .featured{
-    background:#ffb703;
-    color:white;
-    padding:5px 12px;
-    border-radius:30px;
-    font-size:12px;
+    background:#C9A227;
+    color:#FFFFFF;
+    padding:5px 13px;
+    border-radius:3px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
-
 .type{
-    background:#0d6efd;
-    color:white;
-    padding:5px 12px;
-    border-radius:30px;
-    font-size:12px;
+    background:rgba(255,255,255,.92);
+    color:#152A4E;
+    padding:5px 13px;
+    border-radius:3px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    margin-left:auto;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
 
+.property-body{
+    padding:22px 24px 24px;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
 .property-title{
-    font-size:24px;
-    font-weight:bold;
-    margin-bottom:10px;
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:600;
+    color:#152A4E;
+    margin-bottom:6px;
+    line-height:1.3;
 }
-
 .location{
-    color:#666;
-    margin-bottom:15px;
+    color:#7A8493;
+    font-size:13.5px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.location::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#C9A227;
+    flex-shrink:0;
 }
 
 .price{
-    color:#198754;
-    font-size:22px;
-    font-weight:bold;
-    margin-bottom:15px;
+    color:#1F6E4F;
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:16px;
+    padding-bottom:16px;
+    border-bottom:1px solid #EEF0F3;
+}
+.price span{
+    font-size:12.5px;
+    color:#8B94A3;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:.4px;
 }
 
 .description{
-    color:#555;
+    color:#5B6472;
+    font-size:14px;
+    line-height:1.6;
     margin-bottom:18px;
 }
 
 .vacant{
     margin-bottom:20px;
+    font-size:13.5px;
+    color:#152A4E;
     font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#F7F8FA;
+    padding:10px 14px;
+    border-radius:6px;
+}
+.vacant span{
+    color:#1F6E4F;
+    font-weight:700;
+}
+
+.managed-by{
+    font-size:11px;
+    color:#A8AFBB;
+    text-align:center;
+    letter-spacing:.4px;
+    margin-bottom:10px;
+}
+.managed-by strong{
+    color:#8B94A3;
 }
 
 .btn-details{
     display:block;
     width:100%;
+    max-width:100%;
+    flex:0 0 auto;
+    align-self:stretch;
     text-align:center;
-    background:#0d6efd;
-    color:white;
-    padding:12px;
-    border-radius:8px;
+    background:#152A4E;
+    color:#FFFFFF;
+    padding:13px 0;
+    margin:0;
+    border-radius:6px;
     text-decoration:none;
-    transition:.3s;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    margin-top:auto;
+    transition:background .25s ease;
+}
+.btn-details:hover{
+    background:#C9A227;
+    color:#FFFFFF;
 }
 
-.btn-details:hover{
-    background:#0b5ed7;
-    color:white;
+.alert-info{
+    grid-column:1/-1;
+    text-align:center;
+    background:#FFFFFF;
+    border:1px solid #EAECEF;
+    color:#6B7280;
+    padding:40px;
+    border-radius:10px;
 }
 </style>
-
-
 <div class="container mt-4">
-
+    <div class="brand-bar">
+        <div class="brand-name">AVC <span>Consultants</span> Ltd.</div>
+        <div class="brand-tagline">Property Management &amp; Real Estate Advisory</div>
+    </div>
     <div class="page-title">
         <h2>Available Properties</h2>
         <p>Find your next home.</p>
     </div>
-
     <div class="property-grid">
-
         {% for property in properties %}
-
         <div class="property-card">
-
-            {% if property.image %}
-                <img src="{{ property.image.url }}"
-                     class="property-image">
-            {% else %}
-                <img src="https://via.placeholder.com/700x450?text=No+Image"
-                     class="property-image">
-            {% endif %}
-
-            <div class="property-body">
-
+            <div class="property-image-wrap">
+                {% if property.image %}
+                    <img src="{{ property.image.url }}"
+                         class="property-image">
+                {% else %}
+                    <img src="https://via.placeholder.com/700x450?text=No+Image"
+                         class="property-image">
+                {% endif %}
                 <div class="badges">
-
                     {% if property.featured %}
                     <span class="featured">
                         Featured
                     </span>
                     {% endif %}
-
                     <span class="type">
                         {{ property.property_type }}
                     </span>
-
                 </div>
-
+            </div>
+            <div class="property-body">
                 <div class="property-title">
                     {{ property.name }}
                 </div>
-
                 <div class="location">
                     {{ property.city }}, {{ property.district }}
                 </div>
-
                 <div class="price">
-                    UGX {{ property.monthly_rent }}/month
+                    <span>Monthly Rent</span><br>
+                    UGX {{ property.monthly_rent }}
                 </div>
-
                 <div class="description">
                     {{ property.description|truncatewords:20 }}
                 </div>
-
                 <div class="vacant">
-                    Vacant Units:
-                    {{ property.vacant_units }}
+                    Vacant Units <span>{{ property.vacant_units }}</span>
                 </div>
-
+                <div class="managed-by">
+                    Managed by <strong>AVC Consultants Ltd.</strong>
+                </div>
                 <a href="{% url 'property_detail' property.id %}" class="btn-details">
                     View Details
                 </a>
-
             </div>
-
         </div>
-
         {% empty %}
-
         <div class="alert alert-info">
             No available properties at the moment.
         </div>
-
         {% endfor %}
-
     </div>
-
 </div>
-
 {% endblock %}

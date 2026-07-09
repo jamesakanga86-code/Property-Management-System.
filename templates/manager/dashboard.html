@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <h2>Manager Dashboard</h2>
+
+    <div class="dashboard-cards">
+        <div class="card">
+            <h3>My Properties</h3>
+            <p>{{ properties.count }} total</p>
+            <a href="{% url 'add_property' %}" class="btn-action">Add New Property</a>
+        </div>
+        <div class="card">
+            <h3>Pending Applications</h3>
+            <p>{{ pending_count }} waiting review</p>
+            <a href="#applications" class="btn-action">View Applications</a>
+        </div>
+    </div>
+
+    <section>
+        <h3>My Properties</h3>
+        {% if properties %}
+            <ul class="property-list">
+                {% for prop in properties %}
+                    <li>
+                        <strong>{{ prop.name }}</strong> — {{ prop.property_type }}
+                        <span>{{ prop.city }}, {{ prop.district }}</span>
+                        <p>Rent: UGX {{ prop.monthly_rent }}</p>
+                        <a href="{% url 'property_detail' prop.id %}" class="btn-link">Details</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have not added any properties yet.</p>
+        {% endif %}
+    </section>
+
+    <section id="applications">
+        <h3>Latest Applications</h3>
+        {% if applications %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Property</th>
+                        <th>Move-in</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                        <tr>
+                            <td>{{ app.client.user.get_full_name }}</td>
+                            <td>{{ app.property.name }}</td>
+                            <td>{{ app.move_in_date }}</td>
+                            <td>{{ app.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No recent property applications.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
