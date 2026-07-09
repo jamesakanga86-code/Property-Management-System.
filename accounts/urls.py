@@ -12,7 +12,8 @@ urlpatterns = [
     path('client/dashboard/',views.client_dashboard,name='client_dashboard'),
     path('properties/', views.property_list, name='property_list'), 
     path('properties/',views.property_list,name='property_list'),
-    path("properties/",views.property_list,name="property_list"),    
+    path("properties/",views.property_list,name="property_list"),  
+    path("property/<int:property_id>/",views.property_detail,name="property_detail"),  
 ]
 
 

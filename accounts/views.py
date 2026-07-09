@@ -84,6 +84,22 @@ def property_list(request):
             "properties": properties
         }
     )
+from django.shortcuts import get_object_or_404
+
+@login_required
+def property_detail(request, property_id):
+    property = get_object_or_404(
+        Property,
+        id=property_id
+    )
+
+    return render(
+        request,
+        "property/property_detail.html",
+        {
+            "property": property
+        }
+    )
 
 # ADD PROPERTY
 @login_required

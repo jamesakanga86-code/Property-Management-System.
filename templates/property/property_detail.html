@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    {% if property.image %}
+        <img src="{{ property.image.url }}"
+             class="img-fluid rounded mb-4"
+             style="width:100%; max-height:500px; object-fit:cover;">
+    {% endif %}
+
+    <h2>{{ property.name }}</h2>
+
+    <hr>
+
+    <p><strong>Property Type:</strong> {{ property.property_type }}</p>
+
+    <p><strong>City:</strong> {{ property.city }}</p>
+
+    <p><strong>District:</strong> {{ property.district }}</p>
+
+    <p><strong>Address:</strong> {{ property.address }}</p>
+
+    <p><strong>Monthly Rent:</strong> UGX {{ property.monthly_rent }}</p>
+
+    <p><strong>Vacant Units:</strong> {{ property.vacant_units }}</p>
+
+    <hr>
+
+    <h4>Description</h4>
+
+    <p>
+        {{ property.description }}
+    </p>
+
+</div>
+
+{% endblock %}
