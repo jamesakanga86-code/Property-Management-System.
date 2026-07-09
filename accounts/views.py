@@ -5,11 +5,14 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Property, Unit, Client, Lease
 from .forms import PropertyForm
+from django.shortcuts import get_object_or_404
 
 
 # HOME
+@login_required
 def home(request):
     return redirect("login")
+
 # LOGIN-PANNEL.
 def login_view(request):
 
@@ -84,21 +87,27 @@ def property_list(request):
             "properties": properties
         }
     )
-from django.shortcuts import get_object_or_404
+
 
 @login_required
 def property_detail(request, property_id):
+
     property = get_object_or_404(
         Property,
         id=property_id
     )
 
+    gallery = property.images.all()
+
+    context = {
+        "property": property,
+        "gallery": gallery,
+    }
+
     return render(
         request,
         "property/property_detail.html",
-        {
-            "property": property
-        }
+        context
     )
 
 # ADD PROPERTY

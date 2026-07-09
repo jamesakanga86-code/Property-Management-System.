@@ -2,38 +2,184 @@
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="container my-5">
 
-    {% if property.image %}
-        <img src="{{ property.image.url }}"
-             class="img-fluid rounded mb-4"
-             style="width:100%; max-height:500px; object-fit:cover;">
-    {% endif %}
+<div class="card shadow-lg border-0">
 
-    <h2>{{ property.name }}</h2>
+{% if property.image %}
+<img
+    id="mainImage"
+    src="{{ property.image.url }}"
+    class="img-fluid rounded mb-4"
+    style="width:100%;height:500px;object-fit:cover;">
+{% endif %}
 
-    <hr>
+<div class="row mt-3">
 
-    <p><strong>Property Type:</strong> {{ property.property_type }}</p>
+{% for photo in gallery %}
 
-    <p><strong>City:</strong> {{ property.city }}</p>
+<div class="col-3 mb-3">
 
-    <p><strong>District:</strong> {{ property.district }}</p>
-
-    <p><strong>Address:</strong> {{ property.address }}</p>
-
-    <p><strong>Monthly Rent:</strong> UGX {{ property.monthly_rent }}</p>
-
-    <p><strong>Vacant Units:</strong> {{ property.vacant_units }}</p>
-
-    <hr>
-
-    <h4>Description</h4>
-
-    <p>
-        {{ property.description }}
-    </p>
+<img
+    src="{{ photo.image.url }}"
+    class="img-fluid rounded shadow-sm gallery-thumb"
+    style="height:120px;width:100%;object-fit:cover;cursor:pointer;"
+    onclick="changeImage(this)">
 
 </div>
 
+{% endfor %}
+
+</div>
+
+
+<div class="card-body">
+
+<div class="d-flex justify-content-between align-items-center">
+
+<div>
+
+<h2 class="fw-bold">
+
+{{ property.name }}
+
+</h2>
+
+<p class="text-muted">
+
+{{ property.city }}, {{ property.district }}
+
+</p>
+
+</div>
+
+{% if property.featured %}
+
+<span class="badge bg-warning text-dark fs-6">
+Featured
+
+</span>
+
+{% endif %}
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-6">
+
+<h4 class="text-success">
+
+UGX {{ property.monthly_rent }}/Month
+
+</h4>
+
+<p>
+
+<strong>Property Type:</strong>
+
+{{ property.property_type }}
+
+</p>
+
+<p>
+
+<strong>Available Units:</strong>
+
+{{ property.vacant_units }}
+
+</p>
+
+<p>
+
+<strong>Address:</strong>
+
+{{ property.address }}
+
+</p>
+<p>
+
+<strong>Managed By:</strong>
+
+{{ property.manager.get_full_name }}
+
+</p>
+
+</div>
+
+<div class="col-md-6">
+
+<h5>Description</h5>
+
+<p>
+
+{{ property.description }}
+
+</p>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row text-center">
+
+<div class="col-md-4 mb-3">
+
+<a href="#"
+
+class="btn btn-primary w-100">
+
+Apply For Property
+
+</a>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<a href="#"
+
+class="btn btn-success w-100">
+
+Book Viewing
+
+</a>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<a href="#"
+
+class="btn btn-dark w-100">
+
+Contact Manager
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<script>
+
+function changeImage(image){
+
+    document.getElementById("mainImage").src = image.src;
+
+}
+
+</script>
+
+
 {% endblock %}
+
