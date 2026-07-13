@@ -21,14 +21,11 @@ def get_dashboard_redirect(user):
     if user.is_superuser:
         return redirect("/admin/")
 
-    if user.groups.filter(name="Manager").exists():
+    elif user.groups.filter(name="Managers").exists():
         return redirect("manager_dashboard")
-
+    
     if user.groups.filter(name="Client").exists():
         return redirect("property_list")
-
-    if user.groups.filter(name="Staff").exists():
-        return redirect("dashboard")
 
     return redirect("dashboard")
 
@@ -55,37 +52,48 @@ def login_view(request):
         )
     return render(request, "accounts/login.html")
 
-# MAIN DASHBOARD
-@login_required
-def dashboard(request):
-
-    lease = Lease.objects.filter(client__user=request.user,is_active=True).first()
-    context = {"lease": lease}
-    return render(request,"dashboard/home.html",context)
-
 # MANAGER DASHBOARD
+from django.db.models import Sum
+
 @login_required
 def manager_dashboard(request):
 
-    if not request.user.groups.filter(name="Manager").exists():
+    if not request.user.groups.filter(name="Managers").exists():
         return redirect("login")
 
     properties = Property.objects.filter(manager=request.user)
-    applications = PropertyApplication.objects.filter(manager=request.user).order_by("-applied_at")
-    pending_count = applications.filter(status="PENDING").count()
 
+    total_properties = properties.count()
+
+    total_units = properties.aggregate(
+        total=Sum("total_units")
+    )["total"] or 0
+
+    occupied_units = properties.aggregate(
+        total=Sum("occupied_units")
+    )["total"] or 0
+    manager_properties = Property.objects.filter(manager=request.user).order_by("-created_at")
+    vacant_units = total_units - occupied_units
+
+    recent_applications = PropertyApplication.objects.filter(
+    manager=request.user
+          ).order_by("-applied_at")[:5]
     context = {
-        "properties": properties,
-        "applications": applications[:5],
-        "pending_count": pending_count,
-    }
 
-    return render(request, "manager/dashboard.html", context)
+    "total_properties": total_properties,
+    "total_units": total_units,
+    "occupied_units": occupied_units,
+    "vacant_units": vacant_units,
+    "manager_properties": manager_properties,
+    "recent_applications": recent_applications
 
-# STAFF DASHBOARD
-@login_required
-def staff_dashboard(request):
-    return HttpResponse("Staff Dashboard")
+}
+
+    return render(
+        request,
+        "manager/dashboard.html",
+        context
+    )
 
 # CLIENT DASHBOARD
 @login_required
@@ -143,7 +151,7 @@ def property_detail(request, property_id):
 @login_required
 def add_property(request):
 
-    if not (request.user.is_superuser or request.user.groups.filter(name="Manager").exists()):
+    if not (request.user.is_superuser or request.user.groups.filter(name="Managers").exists()):
         return redirect("login")
 
     if request.method == "POST":
