@@ -3,320 +3,526 @@
 {% block title %}Manager Dashboard{% endblock %}
 
 {% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
-<div class="container mt-5">
+.dash-wrap *{
+    box-sizing:border-box;
+}
 
-    <h2 class="mb-4">
-        Welcome,
-        {{ request.user.first_name|default:request.user.username }}
-        👋
-    </h2>
+body{
+    background:#F4F5F7;
+    font-family:'Inter',sans-serif;
+}
+
+.dash-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 0;
+    border-bottom:1px solid #E4E7EC;
+    margin-bottom:8px;
+}
+.dash-topbar .brand-name{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:18px;
+    color:#152A4E;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+}
+.dash-topbar .brand-name span{
+    color:#C9A227;
+}
+.dash-topbar .dash-label{
+    font-size:11.5px;
+    color:#8B94A3;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    font-weight:600;
+}
+
+.dash-welcome{
+    margin:34px 0 30px;
+}
+.dash-welcome h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:30px;
+    color:#152A4E;
+    margin-bottom:6px;
+}
+.dash-welcome p{
+    color:#7A8493;
+    font-size:14.5px;
+    margin:0;
+}
+
+.stat-card{
+    background:#FFFFFF;
+    border-radius:12px;
+    border:1px solid #EAECEF;
+    box-shadow:0 1px 3px rgba(21,42,78,.05),0 8px 20px rgba(21,42,78,.06);
+    padding:26px 20px;
+    text-align:center;
+    height:100%;
+    border-top:3px solid transparent;
+    transition:transform .3s ease,box-shadow .3s ease;
+}
+.stat-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 4px 10px rgba(21,42,78,.08),0 16px 30px rgba(21,42,78,.12);
+}
+.stat-card.navy{ border-top-color:#152A4E; }
+.stat-card.gold{ border-top-color:#C9A227; }
+.stat-card.green{ border-top-color:#1F6E4F; }
+.stat-card.slate{ border-top-color:#8B94A3; }
+
+.stat-icon{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin:0 auto 14px;
+}
+.stat-card.navy .stat-icon{ background:rgba(21,42,78,.08); }
+.stat-card.gold .stat-icon{ background:rgba(201,162,39,.12); }
+.stat-card.green .stat-icon{ background:rgba(31,110,79,.1); }
+.stat-card.slate .stat-icon{ background:rgba(139,148,163,.12); }
+
+.stat-card h3{
+    font-family:'Fraunces',serif;
+    font-size:30px;
+    font-weight:700;
+    color:#152A4E;
+    margin-bottom:4px;
+}
+.stat-card p{
+    color:#8B94A3;
+    font-size:13px;
+    letter-spacing:.3px;
+    text-transform:uppercase;
+    font-weight:600;
+    margin:0;
+}
+
+.dash-divider{
+    border:none;
+    border-top:1px solid #E4E7EC;
+    margin:44px 0 34px;
+}
+
+.section-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    color:#152A4E;
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.qa-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:22px 12px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.3px;
+    border:1.5px solid transparent;
+    transition:all .25s ease;
+}
+.qa-btn .qa-icon{
+    font-size:24px;
+}
+.qa-primary{
+    background:#152A4E;
+    color:#FFFFFF;
+}
+.qa-primary:hover{
+    background:#C9A227;
+    color:#FFFFFF;
+}
+.qa-outline-green{
+    background:#FFFFFF;
+    color:#1F6E4F;
+    border-color:#1F6E4F;
+}
+.qa-outline-green:hover{
+    background:#1F6E4F;
+    color:#FFFFFF;
+}
+.qa-outline-gold{
+    background:#FFFFFF;
+    color:#9A7B1E;
+    border-color:#C9A227;
+}
+.qa-outline-gold:hover{
+    background:#C9A227;
+    color:#FFFFFF;
+}
+.qa-outline-dark{
+    background:#FFFFFF;
+    color:#152A4E;
+    border-color:#152A4E;
+}
+.qa-outline-dark:hover{
+    background:#152A4E;
+    color:#FFFFFF;
+}
+
+.prop-card{
+    background:#FFFFFF;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid #EAECEF;
+    box-shadow:0 1px 3px rgba(21,42,78,.05),0 8px 20px rgba(21,42,78,.06);
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    transition:transform .3s ease,box-shadow .3s ease;
+}
+.prop-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 4px 10px rgba(21,42,78,.08),0 16px 30px rgba(21,42,78,.12);
+}
+.prop-card-img{
+    height:220px;
+    width:100%;
+    object-fit:cover;
+    display:block;
+}
+.prop-card-body{
+    padding:22px 24px 24px;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+.prop-card-body h4{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:20px;
+    color:#152A4E;
+    margin-bottom:4px;
+}
+.prop-card-body .prop-location{
+    color:#7A8493;
+    font-size:13.5px;
+    margin-bottom:14px;
+}
+.prop-card-body p{
+    font-size:14px;
+    color:#3F4654;
+    margin-bottom:8px;
+}
+.prop-card-body p strong{
+    color:#152A4E;
+    font-weight:600;
+    margin-right:4px;
+}
+.prop-actions{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+}
+.btn-view,
+.btn-edit{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+    border-radius:6px;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.3px;
+    text-decoration:none;
+    border:1.5px solid transparent;
+    transition:all .25s ease;
+}
+.btn-view{
+    background:#152A4E;
+    color:#FFFFFF;
+}
+.btn-view:hover{
+    background:#C9A227;
+    color:#FFFFFF;
+}
+.btn-edit{
+    background:#FFFFFF;
+    color:#152A4E;
+    border-color:#D7DBE2;
+}
+.btn-edit:hover{
+    border-color:#152A4E;
+    background:#F7F8FA;
+}
+
+.empty-note{
+    background:#FFFFFF;
+    border:1px solid #EAECEF;
+    color:#8B94A3;
+    padding:30px;
+    border-radius:10px;
+    text-align:center;
+    font-size:14px;
+}
+
+.app-list{
+    background:#FFFFFF;
+    border:1px solid #EAECEF;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(21,42,78,.05),0 8px 20px rgba(21,42,78,.06);
+}
+.app-item{
+    padding:20px 24px;
+    border-bottom:1px solid #EEF0F3;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    transition:background .2s ease;
+}
+.app-item:last-child{
+    border-bottom:none;
+}
+.app-item:hover{
+    background:#FAFBFC;
+}
+.app-item h5{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16.5px;
+    color:#152A4E;
+    margin-bottom:4px;
+}
+.app-item p{
+    font-size:14px;
+    color:#5B6472;
+    margin-bottom:4px;
+}
+.app-item small{
+    color:#9AA2AF;
+    font-size:12.5px;
+}
+.app-status-wrap{
+    text-align:right;
+}
+.status-badge{
+    display:inline-block;
+    padding:5px 14px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+}
+.status-pending{
+    background:rgba(201,162,39,.14);
+    color:#9A7B1E;
+}
+.status-approved{
+    background:rgba(31,110,79,.12);
+    color:#1F6E4F;
+}
+.status-rejected{
+    background:rgba(179,38,30,.1);
+    color:#B3261E;
+}
+.btn-review{
+    display:inline-block;
+    margin-top:10px;
+    padding:7px 18px;
+    background:#152A4E;
+    color:#FFFFFF;
+    border-radius:6px;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.3px;
+    text-decoration:none;
+    transition:background .25s ease;
+}
+.btn-review:hover{
+    background:#C9A227;
+    color:#FFFFFF;
+}
+
+@media (max-width:768px){
+    .app-status-wrap{
+        text-align:left;
+        width:100%;
+    }
+}
+</style>
+
+<div class="container mt-4 dash-wrap">
+    <div class="dash-topbar">
+        <div class="brand-name">AVC <span>Consultants</span> Ltd.</div>
+        <div class="dash-label">Property Manager's Dashboard</div>
+    </div>
+
+    <div class="dash-welcome">
+        <h2>
+            Welcome Back,
+            {{ request.user.first_name|default:request.user.username }}
+            
+        </h2>
+        <p>Here's what's happening with your properties today.</p>
+    </div>
 
     <div class="row g-4">
 
         <div class="col-md-3">
-            <div class="card shadow border-0">
-                <div class="card-body text-center">
-                    <h1>🏠</h1>
-                    <h3>{{ total_properties }}</h3>
-                    <p class="text-muted">My Properties</p>
-                </div>
+            <div class="stat-card navy">
+                <h3>{{ total_properties }}</h3>
+                <p>My Properties</p>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-0">
-                <div class="card-body text-center">
-                    <h1>🏢</h1>
-                    <h3>{{ total_units }}</h3>
-                    <p class="text-muted">Total Units</p>
-                </div>
+            <div class="stat-card gold">
+                <h3>{{ total_units }}</h3>
+                <p>Total Units</p>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-0">
-                <div class="card-body text-center">
-                    <h1>🟢</h1>
-                    <h3>{{ occupied_units }}</h3>
-                    <p class="text-muted">Occupied Units</p>
-                </div>
+            <div class="stat-card green">
+                <h3>{{ occupied_units }}</h3>
+                <p>Occupied Units</p>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card shadow border-0">
-                <div class="card-body text-center">
-                    <h1>⚪</h1>
-                    <h3>{{ vacant_units }}</h3>
-                    <p class="text-muted">Vacant Units</p>
-                </div>
+            <div class="stat-card slate">
+                <h3>{{ vacant_units }}</h3>
+                <p>Vacant Units</p>
             </div>
         </div>
 
     </div>
-
 </div>
-<hr class="my-5">
 
+<div class="container dash-wrap">
+    <hr class="dash-divider">
 
-<hr class="my-5">
+    <h3 class="section-title">Quick Actions</h3>
 
-<h3 class="mb-4">
-    ⚡ Quick Actions
-</h3>
+    <div class="row g-3">
 
-<div class="row">
+        <div class="col-md-3">
+            <a href="{% url 'add_property' %}" class="qa-btn qa-primary">
+                <span class="qa-icon">➕</span>
+                Add Property
+            </a>
+        </div>
 
-    <div class="col-md-3 mb-3">
+        <div class="col-md-3">
+            <a href="#" class="qa-btn qa-outline-green">
+                <span class="qa-icon">📨</span>
+                Applications
+            </a>
+        </div>
 
-        <a href="{% url 'add_property' %}"
-           class="btn btn-primary w-100 py-3">
+        <div class="col-md-3">
+            <a href="#" class="qa-btn qa-outline-gold">
+                <span class="qa-icon">👥</span>
+                Tenants
+            </a>
+        </div>
 
-            ➕ Add Property
-
-        </a>
+        <div class="col-md-3">
+            <a href="#" class="qa-btn qa-outline-dark">
+                <span class="qa-icon">📊</span>
+                Reports
+            </a>
+        </div>
 
     </div>
 
-    <div class="col-md-3 mb-3">
+    <hr class="dash-divider">
 
-        <a href="#"
-           class="btn btn-success w-100 py-3">
+    <h3 class="section-title">My Properties</h3>
 
-            📨 Applications
+    <div class="row g-4">
 
-        </a>
+        {% for property in manager_properties %}
+        <div class="col-md-6">
+            <div class="prop-card">
+                {% if property.image %}
+                <img
+                    src="{{ property.image.url }}"
+                    class="prop-card-img">
+                {% endif %}
+                <div class="prop-card-body">
+                    <h4>{{ property.name }}</h4>
+                    <p class="prop-location">{{ property.city }}, {{ property.district }}</p>
+                    <p><strong>Type:</strong> {{ property.property_type }}</p>
+                    <p><strong>Units:</strong> {{ property.total_units }}</p>
+                    <p><strong>Occupied:</strong> {{ property.occupied_units }}</p>
+                    <div class="prop-actions">
+                        <a href="{% url 'property_detail' property.id %}" class="btn-view">
+                            View
+                        </a>
+                        <a href="#" class="btn-edit">
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-note">
+                You haven't added any properties yet.
+            </div>
+        </div>
+        {% endfor %}
 
     </div>
 
-    <div class="col-md-3 mb-3">
+    <hr class="dash-divider">
 
-        <a href="#"
-           class="btn btn-warning w-100 py-3">
+    <h3 class="section-title">Recent Applications</h3>
 
-            👥 Tenants
-
-        </a>
-
+    {% if recent_applications %}
+    <div class="app-list">
+        {% for application in recent_applications %}
+        <div class="app-item">
+            <div>
+                <h5>{{ application.client.user.get_full_name }}</h5>
+                <p>Applied for <strong>{{ application.property.name }}</strong></p>
+                <small>Move-in: {{ application.move_in_date }}</small>
+            </div>
+            <div class="app-status-wrap">
+                {% if application.status == "PENDING" %}
+                <span class="status-badge status-pending">Pending</span>
+                {% elif application.status == "APPROVED" %}
+                <span class="status-badge status-approved">Approved</span>
+                {% else %}
+                <span class="status-badge status-rejected">Rejected</span>
+                {% endif %}
+                <br>
+                <a href="#" class="btn-review">Review</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-
-    <div class="col-md-3 mb-3">
-
-        <a href="#"
-           class="btn btn-dark w-100 py-3">
-
-            📊 Reports
-
-        </a>
-
+    {% else %}
+    <div class="empty-note">
+        No recent applications.
     </div>
+    {% endif %}
 
 </div>
-
-
-
-
-<h3 class="mb-4">
-    🏠 My Properties
-</h3>
-
-<div class="row">
-
-{% for property in manager_properties %}
-
-<div class="col-md-6 mb-4">
-
-<div class="card shadow-sm h-100">
-
-{% if property.image %}
-
-<img
-src="{{ property.image.url }}"
-class="card-img-top"
-style="height:220px;object-fit:cover;">
-
-{% endif %}
-
-<div class="card-body">
-
-<h4>
-
-{{ property.name }}
-
-</h4>
-
-<p class="text-muted">
-
-{{ property.city }}, {{ property.district }}
-
-</p>
-
-<p>
-
-<strong>Type:</strong>
-
-{{ property.property_type }}
-
-</p>
-
-<p>
-
-<strong>Units:</strong>
-
-{{ property.total_units }}
-
-</p>
-
-<p>
-
-<strong>Occupied:</strong>
-
-{{ property.occupied_units }}
-
-</p>
-
-<div class="d-flex gap-2">
-
-<a
-href="{% url 'property_detail' property.id %}"
-class="btn btn-primary">
-
-View
-
-</a>
-
-<a
-href="#"
-class="btn btn-outline-secondary">
-
-Edit
-
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-{% empty %}
-
-<div class="col-12">
-
-<div class="alert alert-info">
-
-You haven't added any properties yet.
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-<hr class="my-5">
-
-<h3 class="mb-4">
-    📨 Recent Applications
-</h3>
-
-{% if recent_applications %}
-
-<div class="list-group">
-
-{% for application in recent_applications %}
-
-<div class="list-group-item">
-
-<div class="d-flex justify-content-between">
-
-<div>
-
-<h5>
-
-{{ application.client.user.get_full_name }}
-
-</h5>
-
-<p class="mb-1">
-
-Applied for
-
-<strong>
-
-{{ application.property.name }}
-
-</strong>
-
-</p>
-
-<small>
-
-Move-in:
-{{ application.move_in_date }}
-
-</small>
-
-</div>
-
-<div class="text-end">
-
-{% if application.status == "PENDING" %}
-
-<span class="badge bg-warning text-dark">
-
-Pending
-
-</span>
-
-{% elif application.status == "APPROVED" %}
-
-<span class="badge bg-success">
-
-Approved
-
-</span>
-
-{% else %}
-
-<span class="badge bg-danger">
-
-Rejected
-
-</span>
-
-{% endif %}
-
-<br><br>
-
-<a href="#"
-
-class="btn btn-sm btn-primary">
-
-Review
-
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-{% else %}
-
-<div class="alert alert-info">
-
-No recent applications.
-
-</div>
-
-{% endif %}
 {% endblock %}

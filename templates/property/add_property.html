@@ -1,30 +1,330 @@
-<div class="container mt-5">
-    <div class="row justify-content-center">
+{% extends "base.html" %}
 
-        <div class="col-md-7">
+{% block title %}Add Property{% endblock %}
 
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-dark text-white">
-                    <h4 class="mb-0">Upload New Property</h4>
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+.prop-form-wrap *{
+    box-sizing:border-box;
+}
+
+body{
+    background:#F4F5F7;
+    font-family:'Inter',sans-serif;
+}
+
+.brand-bar{
+    text-align:center;
+    padding:22px 0 18px;
+    border-bottom:1px solid #E4E7EC;
+    margin-bottom:32px;
+}
+.brand-bar .brand-name{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:22px;
+    color:#152A4E;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+.brand-bar .brand-name span{
+    color:#C9A227;
+}
+.brand-bar .brand-tagline{
+    color:#8B94A3;
+    font-size:11.5px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:3px;
+}
+
+.form-page-header{
+    max-width:760px;
+    margin:0 auto 24px;
+}
+.form-page-header h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:28px;
+    color:#152A4E;
+    margin-bottom:6px;
+}
+.form-page-header p{
+    color:#7A8493;
+    font-size:14px;
+    margin:0;
+}
+
+.prop-form-card{
+    max-width:760px;
+    margin:0 auto;
+    background:#FFFFFF;
+    border-radius:12px;
+    border:1px solid #EAECEF;
+    box-shadow:0 1px 3px rgba(21,42,78,.06),0 10px 28px rgba(21,42,78,.08);
+    padding:38px 44px 34px;
+}
+
+.section-heading{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:22px;
+}
+.section-heading .icon-chip{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    background:rgba(21,42,78,.07);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+}
+.section-heading h5{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    color:#152A4E;
+    margin:0;
+}
+
+.form-label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:#152A4E;
+    letter-spacing:.3px;
+    text-transform:uppercase;
+    margin-bottom:8px;
+}
+
+.prop-form-card input[type="text"],
+.prop-form-card input[type="number"],
+.prop-form-card input[type="date"],
+.prop-form-card input:not([type]),
+.prop-form-card select,
+.prop-form-card textarea{
+    width:100%;
+    padding:11px 14px;
+    border:1.5px solid #E1E4EA;
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:#152A4E;
+    background:#FBFBFC;
+    transition:border-color .2s ease,background .2s ease;
+}
+.prop-form-card input:focus,
+.prop-form-card select:focus,
+.prop-form-card textarea:focus{
+    outline:none;
+    border-color:#C9A227;
+    background:#FFFFFF;
+}
+.prop-form-card textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+.prop-form-card input[type="file"]{
+    width:100%;
+    padding:9px 12px;
+    border:1.5px dashed #D7DBE2;
+    border-radius:7px;
+    background:#FBFBFC;
+    font-size:13.5px;
+    color:#7A8493;
+}
+.prop-form-card input[type="file"]:hover{
+    border-color:#C9A227;
+}
+
+.mb-3, .mb-2, .mb-4{
+    margin-bottom:20px;
+}
+
+.section-divider{
+    border:none;
+    border-top:1px solid #EEF0F3;
+    margin:6px 0 28px;
+}
+
+.status-check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px;
+    background:#FBFBFC;
+    border:1.5px solid #E1E4EA;
+    border-radius:8px;
+    margin-bottom:12px;
+    transition:border-color .2s ease,background .2s ease;
+}
+.status-check:hover{
+    border-color:#C9A227;
+    background:#FFFFFF;
+}
+.status-check input{
+    width:17px;
+    height:17px;
+    accent-color:#152A4E;
+    cursor:pointer;
+    flex-shrink:0;
+}
+.status-check label{
+    font-size:14px;
+    color:#152A4E;
+    font-weight:500;
+    margin:0;
+    cursor:pointer;
+}
+
+.btn-save{
+    display:block;
+    width:100%;
+    padding:16px 0;
+    background:#152A4E;
+    color:#FFFFFF;
+    border:none;
+    border-radius:8px;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:background .25s ease;
+}
+.btn-save:hover{
+    background:#C9A227;
+}
+
+@media (max-width:768px){
+    .prop-form-card{padding:26px 22px 26px;}
+}
+</style>
+
+<div class="container my-5 prop-form-wrap">
+    <div class="brand-bar">
+        <div class="brand-name">AVC <span>Consultants</span> Ltd.</div>
+        <div class="brand-tagline">Property Management &amp; Real Estate Advisory</div>
+    </div>
+
+    <div class="form-page-header">
+        <h2>Add New Property</h2>
+        <p>Fill in the details below to list a new property under your management.</p>
+    </div>
+
+    <div class="prop-form-card">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="section-heading">
+                <h5>Property Information</h5>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Name</label>
+                    {{ form.name }}
                 </div>
 
-                <div class="card-body">
-
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        {{ form.as_p }}
-
-                        <button type="submit" class="btn btn-primary w-100 mt-3">
-                            Save Property
-                        </button>
-
-                    </form>
-
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Type</label>
+                    {{ form.property_type }}
                 </div>
             </div>
 
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Monthly Rent (UGX)</label>
+                    {{ form.monthly_rent }}
+                </div>
 
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Image</label>
+                    {{ form.image }}
+                </div>
+            </div>
+
+            <hr class="section-divider">
+            <div class="section-heading">
+                
+                <h5>Location</h5>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">City</label>
+                    {{ form.city }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">District</label>
+                    {{ form.district }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Full Address</label>
+                {{ form.address }}
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="section-heading">
+                <h5>Property Units</h5>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Total Units</label>
+                    {{ form.total_units }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Occupied Units</label>
+                    {{ form.occupied_units }}
+                </div>
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="section-heading">
+                <h5>Property Description</h5>
+            </div>
+
+            <div class="mb-3">
+                {{ form.description }}
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="section-heading">
+                <h5>Property Status</h5>
+            </div>
+
+            <div class="status-check mb-2">
+                {{ form.is_available }}
+                <label class="form-check-label">
+                    Available for Rent
+                </label>
+            </div>
+
+            <div class="status-check mb-4">
+                {{ form.featured }}
+                <label class="form-check-label">
+                    Featured Property
+                </label>
+            </div>
+
+            <button type="submit" class="btn-save">
+              Upload Property.
+            </button>
+        </form>
     </div>
 </div>
+{% endblock %}

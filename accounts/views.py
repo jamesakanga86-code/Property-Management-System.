@@ -164,9 +164,9 @@ def add_property(request):
         if form.is_valid():
 
             property = form.save(commit=False)
+            property.manager = request.user
             property.save()
-
-            return redirect("add_property")
+            return redirect("manager_dashboard")
 
     else:
         form = PropertyForm()
