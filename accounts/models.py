@@ -52,50 +52,15 @@ class PropertyApplication(models.Model):
         ('REJECTED', 'Rejected'),
     ]
 
-    client = models.ForeignKey(
-        Client,
-        on_delete=models.CASCADE,
-        related_name='applications'
-    )
-
-    phone_number = models.CharField(
-    max_length=20
-)
-
-    national_id = models.CharField(
-    max_length=50,
-    blank=True,
-    null=True
-)
-
-    property = models.ForeignKey(
-        Property,
-        on_delete=models.CASCADE,
-        related_name='applications'
-    )
-
-    manager = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='received_applications'
-    )
-
-    message = models.TextField(
-        blank=True
-    )
-
+    client = models.ForeignKey(Client,on_delete=models.CASCADE,related_name='applications')
+    phone_number = models.CharField(max_length=20)
+    national_id = models.CharField(max_length=50,blank=True,null=True)
+    property = models.ForeignKey(Property,on_delete=models.CASCADE,related_name='applications')
+    manager = models.ForeignKey(User,on_delete=models.CASCADE,related_name='received_applications')
+    message = models.TextField(blank=True)
     move_in_date = models.DateField()
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='PENDING'
-    )
-
-    applied_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='PENDING')
+    applied_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.client.user.username} → {self.property.name}"
 

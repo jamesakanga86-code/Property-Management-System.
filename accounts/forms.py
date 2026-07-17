@@ -2,7 +2,6 @@ from django import forms
 from .models import Property
 from django.contrib.auth.models import User
 from .models import PropertyApplication
-
 from django import forms
 from .models import Property
 
@@ -112,7 +111,7 @@ class PropertyApplicationForm(forms.ModelForm):
     "national_id",
     "message",
 ]
-
+        
         widgets = {
             "move_in_date": forms.DateInput(
                 attrs={"type": "date"}
