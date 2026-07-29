@@ -1,6 +1,12 @@
-{% extends "base.html" %}
+{% extends "manager/manager_base.html" %}
 
-{% block title %}Manager Dashboard{% endblock %}
+{% block title %}
+Manager Dashboard
+{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
 
 {% block content %}
 <style>
@@ -365,21 +371,25 @@ body{
 }
 </style>
 
-<div class="container mt-4 dash-wrap">
-    <div class="dash-topbar">
-        <div class="brand-name">AVC <span>Consultants</span> Ltd.</div>
-        <div class="dash-label">Property Manager's Dashboard</div>
-    </div>
+<div class="container-fluid dash-wrap">
+    
 
     <div class="dash-welcome">
-        <h2>
-            Welcome Back,
-            {{ request.user.first_name|default:request.user.username }}
-            
-        </h2>
-        <p>Here's what's happening with your properties today.</p>
-    </div>
 
+<h2>
+
+Good Afternoon,
+<strong>{{ request.user.first_name|default:request.user.username }}</strong>
+
+</h2>
+
+<p>
+
+Manage your properties, applications and clients from one place.
+
+</p>
+
+</div>
     <div class="row g-4">
 
         <div class="col-md-3">
@@ -413,7 +423,7 @@ body{
     </div>
 </div>
 
-<div class="container dash-wrap">
+<div class="container-fluid dash-wrap">
     <hr class="dash-divider">
 
     <h3 class="section-title">Quick Actions</h3>
@@ -428,7 +438,7 @@ body{
         </div>
 
         <div class="col-md-3">
-            <a href="#" class="qa-btn qa-outline-green">
+            <a href="{% url 'manager_applications' %}" class="qa-btn qa-outline-green">
                 <span class="qa-icon">📨</span>
                 Applications
             </a>
@@ -437,7 +447,7 @@ body{
         <div class="col-md-3">
             <a href="#" class="qa-btn qa-outline-gold">
                 <span class="qa-icon">👥</span>
-                Tenants
+                Clients
             </a>
         </div>
 
@@ -474,7 +484,7 @@ body{
                         <a href="{% url 'property_detail' property.id %}" class="btn-view">
                             View
                         </a>
-                        <a href="#" class="btn-edit">
+                        <a href="{% url 'edit_property' property.id %}" class="btn-edit">
                             Edit
                         </a>
                     </div>
