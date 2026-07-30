@@ -1,0 +1,40 @@
+{% extends "manager/manager_base.html" %}
+
+
+{% block content %}
+
+<h3>
+Delete Property
+</h3>
+
+
+<p>
+Are you sure you want to delete:
+
+<strong>
+{{ property.name }}
+</strong>
+?
+</p>
+
+
+<form method="POST">
+
+{% csrf_token %}
+
+
+<button class="btn btn-danger">
+Yes, Delete
+</button>
+
+
+<a href="{% url 'manager_properties' %}"
+class="btn btn-secondary">
+Cancel
+</a>
+
+
+</form>
+
+
+{% endblock %}

@@ -13,6 +13,7 @@ from .forms import PropertyApplicationForm
 from .models import Property, PropertyApplication
 from django.contrib import messages
 from django.db.models import Sum
+from django.shortcuts import (render,redirect,get_object_or_404)
 
 def home(request):
     return redirect("login")
@@ -290,5 +291,115 @@ def manager_applications(request):
         "manager/applications.html",
         {
             "applications": applications
+        }
+    )
+
+@login_required
+def edit_property(request, id):
+
+    property = get_object_or_404(
+        Property,
+        id=id,
+        manager=request.user
+    )
+
+
+    if request.method == "POST":
+
+        form = PropertyForm(
+            request.POST,
+            request.FILES,
+            instance=property
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "manager_properties"
+            )
+
+
+    else:
+
+        form = PropertyForm(
+            instance=property
+        )
+
+
+    return render(
+        request,
+        "manager/edit_property.html",
+        {
+            "form": form,
+            "property": property
+        }
+    )
+
+@login_required
+def manager_properties(request):
+
+    if not request.user.groups.filter(name="Managers").exists():
+        return redirect("login")
+
+
+    properties = Property.objects.filter(
+        manager=request.user
+    ).order_by("-created_at")
+
+
+    context = {
+        "properties": properties
+    }
+
+
+    return render(
+        request,
+        "manager/properties.html",
+        context
+    )
+@login_required
+def manager_properties(request):
+
+    if not request.user.groups.filter(name="Managers").exists():
+        return redirect("login")
+
+    properties = Property.objects.filter(
+        manager=request.user
+    ).order_by("-created_at")
+
+    context = {
+        "properties": properties
+    }
+
+    return render(
+        request,
+        "manager/properties.html",
+        context
+    )
+@login_required
+def delete_property(request, id):
+
+    property = get_object_or_404(
+        Property,
+        id=id,
+        manager=request.user
+    )
+
+
+    if request.method == "POST":
+
+        property.delete()
+
+        return redirect(
+            "manager_properties"
+        )
+
+
+    return render(
+        request,
+        "manager/delete_property.html",
+        {
+            "property": property
         }
     )

@@ -1,0 +1,246 @@
+{% extends "manager/manager_base.html" %}
+
+{% block title %}
+My Properties
+{% endblock %}
+
+{% block page_title %}
+Properties
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+  .properties-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .properties-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: #fff;
+    border-bottom: 1px solid #eef0f2;
+  }
+
+  .properties-header h3 {
+    margin: 0;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .properties-table {
+    margin-bottom: 0;
+  }
+
+  .properties-table thead th {
+    background-color: #f8f9fb;
+    color: #6b7280;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    border-bottom: 2px solid #eef0f2;
+    padding: 0.9rem 1rem;
+    white-space: nowrap;
+  }
+
+  .properties-table tbody td {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+    border-color: #f1f2f4;
+  }
+
+  .properties-table tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  .properties-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+
+  .property-name {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .property-location {
+    color: #6b7280;
+  }
+
+  .property-location i {
+    color: #9ca3af;
+    margin-right: 4px;
+  }
+
+  .type-badge {
+    background-color: #eef2ff;
+    color: #4338ca;
+    font-weight: 500;
+    font-size: 0.78rem;
+    padding: 0.35em 0.7em;
+    border-radius: 6px;
+  }
+
+  .units-count {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .occupancy-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 130px;
+  }
+
+  .occupancy-bar {
+    flex: 1;
+    height: 6px;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .occupancy-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #34d399, #10b981);
+  }
+
+  .occupancy-fill.warning {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  }
+
+  .occupancy-fill.low {
+    background: linear-gradient(90deg, #f87171, #ef4444);
+  }
+
+  .occupancy-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+  }
+
+  .action-btns .btn {
+    border-radius: 6px;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    margin-right: 0.25rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #9ca3af;
+  }
+
+  .empty-state i {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #d1d5db;
+  }
+</style>
+
+<div class="properties-card">
+
+  <div class="properties-header">
+    <h3><i class="bi bi-building me-2"></i>My Properties</h3>
+    <span class="text-muted small">{{ properties|length }} total</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table properties-table">
+
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Location</th>
+          <th>Units</th>
+          <th>Occupied</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for property in properties %}
+        {% widthratio property.occupied_units property.total_units 100 as occupancy_pct %}
+
+        <tr>
+
+          <td>
+            <span class="property-name">{{ property.name }}</span>
+          </td>
+
+          <td>
+            <span class="type-badge">{{ property.property_type }}</span>
+          </td>
+
+          <td class="property-location">
+            <i class="bi bi-geo-alt-fill"></i>{{ property.city }}, {{ property.district }}
+          </td>
+
+          <td>
+            <span class="units-count">{{ property.total_units }}</span>
+          </td>
+
+          <td>
+            <div class="occupancy-wrap">
+              <div class="occupancy-bar">
+                <div class="occupancy-fill {% if occupancy_pct < 50 %}low{% elif occupancy_pct < 80 %}warning{% endif %}"
+                     style="width: {{ occupancy_pct }}%"></div>
+              </div>
+              <span class="occupancy-label">{{ property.occupied_units }}/{{ property.total_units }}</span>
+            </div>
+          </td>
+
+          <td class="text-end action-btns">
+            <a href="{% url 'property_detail' property.id %}"
+               class="btn btn-sm btn-outline-info" title="View">
+              <i class="bi bi-eye"></i>
+            </a>
+
+            <a href="{% url 'edit_property' property.id %}"
+               class="btn btn-sm btn-outline-primary" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </a>
+
+            <a href="{% url 'delete_property' property.id %}"
+               class="btn btn-sm btn-outline-danger" title="Delete"
+               onclick="return confirm('Are you sure you want to delete this property?');">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="bi bi-house-slash"></i>
+              No properties added yet.
+            </div>
+          </td>
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}

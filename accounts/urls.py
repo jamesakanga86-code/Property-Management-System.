@@ -14,6 +14,10 @@ urlpatterns = [
     path('property/<int:property_id>/', views.property_detail, name='property_detail'),
     path('property/<int:property_id>/apply/', views.apply_property, name='apply_property'),
     path('manager/applications/', views.manager_applications, name='manager_applications'),
+    path('property/edit/<int:id>/', views.edit_property, name='edit_property'),
+    path('manager/properties/', views.manager_properties, name='manager_properties'),
+    path('manager/property/delete/<int:id>/', views.delete_property, name='delete_property'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

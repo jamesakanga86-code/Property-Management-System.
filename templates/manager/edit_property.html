@@ -1,0 +1,208 @@
+{% extends "manager/manager_base.html" %}
+
+{% block title %}
+Edit Property
+{% endblock %}
+
+{% block page_title %}
+Edit Property
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+  .form-card {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .form-card-header {
+    padding: 1.5rem 1.75rem;
+    border-bottom: 1px solid #eef0f2;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-card-header .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eef2ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .form-card-header h3 {
+    margin: 0;
+    font-weight: 600;
+    color: #111827;
+    font-size: 1.15rem;
+  }
+
+  .form-card-header p {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 0.85rem;
+  }
+
+  .form-card-body {
+    padding: 1.75rem;
+  }
+
+  /* Style Django's default form.as_p output */
+  .property-form p {
+    margin-bottom: 1.15rem;
+  }
+
+  .property-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.4rem;
+  }
+
+  .property-form input[type="text"],
+  .property-form input[type="number"],
+  .property-form input[type="email"],
+  .property-form input[type="url"],
+  .property-form input[type="password"],
+  .property-form input[type="file"],
+  .property-form select,
+  .property-form textarea {
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid #e2e4e9;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: #111827;
+    background-color: #fafafb;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .property-form input:focus,
+  .property-form select:focus,
+  .property-form textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  }
+
+  .property-form textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .property-form input[type="checkbox"],
+  .property-form input[type="radio"] {
+    width: auto;
+    margin-right: 0.4rem;
+    accent-color: #6366f1;
+  }
+
+  .property-form input[type="file"] {
+    background-color: #fff;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+  }
+
+  /* Django's error list styling */
+  .property-form ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.35rem 0 0;
+    color: #dc2626;
+    font-size: 0.8rem;
+  }
+
+  .property-form .helptext {
+    display: block;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: 0.3rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f1f2f4;
+  }
+
+  .form-actions .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.55rem 1.3rem;
+    font-size: 0.9rem;
+  }
+
+  .form-actions .btn-success {
+    background-color: #10b981;
+    border-color: #10b981;
+  }
+
+  .form-actions .btn-success:hover {
+    background-color: #059669;
+    border-color: #059669;
+  }
+
+  .form-actions .btn-secondary {
+    background-color: #fff;
+    border-color: #e2e4e9;
+    color: #6b7280;
+  }
+
+  .form-actions .btn-secondary:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+</style>
+
+<div class="form-card">
+
+  <div class="form-card-header">
+    <div class="icon-circle">
+      <i class="bi bi-building-gear"></i>
+    </div>
+    <div>
+      <h3>Edit Property</h3>
+      <p>Update the details for this property</p>
+    </div>
+  </div>
+
+  <div class="form-card-body">
+    <form method="POST" enctype="multipart/form-data" class="property-form">
+
+      {% csrf_token %}
+
+      {{ form.as_p }}
+
+      <div class="form-actions">
+        <button class="btn btn-success">
+          <i class="bi bi-check-lg me-1"></i>Save Changes
+        </button>
+
+        <a href="{% url 'manager_properties' %}"
+           class="btn btn-secondary">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}
