@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('login/', views.login_view, name='login'),
     path('manager/dashboard/', views.manager_dashboard, name='manager_dashboard'),
+    path('manager/application-trend/',views.application_trend_live,name='application_trend_live'),
     path('add-property/', views.add_property, name='add_property'),
     path('register/', views.register_client, name='register'),
     path('client/dashboard/', views.client_dashboard, name='client_dashboard'),

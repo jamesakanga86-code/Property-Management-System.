@@ -9,6 +9,9 @@ Dashboard
 {% endblock %}
 
 {% block content %}
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -58,6 +61,7 @@ body{
     color:#152A4E;
     margin-bottom:6px;
 }
+
 .dash-welcome p{
     color:#7A8493;
     font-size:14.5px;
@@ -389,39 +393,30 @@ Manage your properties, applications and clients from one place.
 
 </p>
 
-</div>
-    <div class="row g-4">
+<h3 class="section-title">Analytics Overview</h3>
 
-        <div class="col-md-3">
-            <div class="stat-card navy">
-                <h3>{{ total_properties }}</h3>
-                <p>My Properties</p>
+<div class="row g-4">
+
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Applications Trend</h6>
+            <div style="height:300px;">
+                <canvas id="applicationsChart"></canvas>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="stat-card gold">
-                <h3>{{ total_units }}</h3>
-                <p>Total Units</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="stat-card green">
-                <h3>{{ occupied_units }}</h3>
-                <p>Occupied Units</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="stat-card slate">
-                <h3>{{ vacant_units }}</h3>
-                <p>Vacant Units</p>
-            </div>
-        </div>
-
     </div>
+
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Occupancy</h6>
+            <div style="height:300px;">
+                <canvas id="occupancyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
 </div>
+
 
 <div class="container-fluid dash-wrap">
     <hr class="dash-divider">
@@ -459,6 +454,7 @@ Manage your properties, applications and clients from one place.
         </div>
 
     </div>
+    
 
     <hr class="dash-divider">
 
@@ -535,4 +531,104 @@ Manage your properties, applications and clients from one place.
     {% endif %}
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("toggleBtn");
+        const sidebar = document.getElementById("sidebar");
+
+        toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+        });
+    });
+ // =====================
+// APPLICATION CHART
+// =====================
+
+const applicationChart = new Chart(
+    document.getElementById('applicationsChart'),
+    {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Applications (30 Seconds)',
+                data: [],
+                borderColor: '#1cc88a',
+                backgroundColor: 'rgba(28,200,138,0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    }
+                }
+            }
+        }
+    }
+);
+
+function updateApplicationTrend() {
+
+    fetch("/manager/application-trend/")
+        .then(response => response.json())
+        .then(data => {
+
+            applicationChart.data.labels = data.labels;
+            applicationChart.data.datasets[0].data = data.values;
+
+            applicationChart.update();
+
+        })
+        .catch(error => console.error(error));
+
+}
+ updateApplicationTrend();
+setInterval(updateApplicationTrend, 30000);
+
+    new Chart(document.getElementById('occupancyChart'), {
+        type: 'pie',
+        data: {
+            labels: occLabels,
+            datasets: [{
+                data: occValues,
+                backgroundColor: ['#1cc88a', '#e74a3b']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+</script>
+
+<script>function updateApplicationTrend() {
+    fetch("/manager/application-trend/")
+        .then(response => response.json())
+        .then(data => {
+
+            applicationChart.data.labels = data.labels;
+            applicationChart.data.datasets[0].data = data.values;
+
+            applicationChart.update();
+
+        })
+        .catch(error => console.error(error));
+}
+
+// Refresh every 30 seconds
+setInterval(updateApplicationTrend, 30000);</script>
 {% endblock %}

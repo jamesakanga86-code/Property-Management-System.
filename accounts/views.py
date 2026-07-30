@@ -1,8 +1,11 @@
+from email.mime import application
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.template import context
 from .models import Property, Unit, Client, Lease
 from .forms import PropertyForm, PropertyApplicationForm
 from django.shortcuts import get_object_or_404
@@ -13,7 +16,16 @@ from .forms import PropertyApplicationForm
 from .models import Property, PropertyApplication
 from django.contrib import messages
 from django.db.models import Sum
+from django.db.models.functions import TruncDay
+from django.db.models import Count
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.functions import TruncMonth
+from django.db.models import Count, Q
 from django.shortcuts import (render,redirect,get_object_or_404)
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
 
 def home(request):
     return redirect("login")
@@ -54,6 +66,47 @@ def login_view(request):
         )
     return render(request, "accounts/login.html")
 
+
+@login_required
+def application_trend_live(request):
+
+    if not request.user.groups.filter(name="Managers").exists():
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    now = timezone.now()
+    start_time = now - timedelta(minutes=5)
+
+    applications = (
+        PropertyApplication.objects
+        .filter(
+            manager=request.user,
+            applied_at__gte=start_time
+        )
+        .order_by("applied_at")
+    )
+
+    labels = []
+    values = []
+
+    current = start_time.replace(microsecond=0)
+
+    while current <= now:
+        next_slot = current + timedelta(seconds=30)
+
+        count = applications.filter(
+            applied_at__gte=current,
+            applied_at__lt=next_slot
+        ).count()
+
+        labels.append(current.strftime("%H:%M:%S"))
+        values.append(count)
+
+        current = next_slot
+
+    return JsonResponse({
+        "labels": labels,
+        "values": values,
+    })
 # MANAGER DASHBOARD
 @login_required
 def manager_dashboard(request):
@@ -62,29 +115,64 @@ def manager_dashboard(request):
         return redirect("login")
 
     properties = Property.objects.filter(manager=request.user)
+
     total_properties = properties.count()
-    total_units = properties.aggregate(total=Sum("total_units"))["total"] or 0
-    occupied_units = properties.aggregate(total=Sum("occupied_units"))["total"] or 0
-    manager_properties = Property.objects.filter(manager=request.user).order_by("-created_at")
-    vacant_units = total_units - occupied_units
-    recent_applications = PropertyApplication.objects.filter(
-    manager = request.user).order_by("-applied_at")[:5]
+
+    total_units = Unit.objects.filter(
+        property__manager=request.user
+    ).count()
+
+    occupied_units = Unit.objects.filter(
+        property__manager=request.user,
+        status="OCCUPIED"
+    ).count()
+
+    vacant_units = Unit.objects.filter(
+        property__manager=request.user,
+        status="VACANT"
+    ).count()
+
+    property_units = (
+        properties.values("name")
+        .annotate(units=Count("units"))
+    )
+
+    recent_applications = (
+        PropertyApplication.objects
+        .filter(manager=request.user)
+        .select_related("client", "property")
+        .order_by("-applied_at")[:5]
+    )
+
+   
+
+    occupancy_data = [
+        {"status": "Occupied", "count": occupied_units},
+        {"status": "Vacant", "count": vacant_units},
+    ]
 
     context = {
     "total_properties": total_properties,
     "total_units": total_units,
     "occupied_units": occupied_units,
     "vacant_units": vacant_units,
-    "manager_properties": manager_properties,
-    "recent_applications": recent_applications
+    "manager_properties": properties,
+    "property_units": json.dumps(
+        list(property_units),
+        cls=DjangoJSONEncoder,
+    ),
+    "recent_applications": recent_applications,
+    "occupancy_data": json.dumps(
+        occupancy_data,
+        cls=DjangoJSONEncoder,
+    ),
 }
 
     return render(
         request,
         "manager/dashboard.html",
-        context
+        context,
     )
-
 
 # CLIENT DASHBOARD
 @login_required
@@ -172,6 +260,7 @@ def add_property(request):
 
 
 # CLIENT REGISTRATION
+# CLIENT REGISTRATION
 def register_client(request):
 
     if request.method == "POST":
@@ -191,8 +280,8 @@ def register_client(request):
                     "error": "Passwords do not match"
                 }
             )
-        if User.objects.filter(username=username).exists():
 
+        if User.objects.filter(username=username).exists():
             return render(
                 request,
                 "accounts/register.html",
@@ -200,6 +289,8 @@ def register_client(request):
                     "error": "Username already exists"
                 }
             )
+
+        # Create user
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -207,9 +298,19 @@ def register_client(request):
             first_name=first_name,
             last_name=last_name,
         )
-        Client.objects.create(user=user)
-        client_group, created = Group.objects.get_or_create(name="Client")
+
+        # Create client profile
+        Client.objects.create(
+            user=user
+        )
+
+        # Add user to Client group
+        client_group, created = Group.objects.get_or_create(
+            name="Client"
+        )
+
         user.groups.add(client_group)
+
         return redirect("login")
 
     return render(
@@ -221,26 +322,39 @@ def register_client(request):
 def apply_property(request, property_id):
 
     property = get_object_or_404(
-        Property,
-        id=property_id
-    )
+    Property,
+    id=property_id
+)
 
-    client = request.user.client
+    client, created = Client.objects.get_or_create(
+    user=request.user
+)
 
     if request.method == "POST":
 
         form = PropertyApplicationForm(request.POST)
+
         if form.is_valid():
+
             application = form.save(commit=False)
             application.client = client
             application.property = property
             application.manager = property.manager
             application.save()
-            messages.success(request,"Your application has been submitted successfully.")
-            return redirect("property_detail", property.id)
+
+            messages.success(
+                request,
+                "Your application has been submitted successfully."
+            )
+
+            return redirect(
+                "property_detail",
+                property_id=property.id
+            )
 
     else:
         form = PropertyApplicationForm()
+
     return render(
         request,
         "property/apply_property.html",
@@ -250,35 +364,6 @@ def apply_property(request, property_id):
         }
     )
 
-
-@login_required
-def apply_property(request, property_id):
-    property = get_object_or_404(
-        Property,
-        id=property_id
-    )
-    client = request.user.client
-    if request.method == "POST":
-        form = PropertyApplicationForm(request.POST)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.client = client
-            application.property = property
-            application.manager = property.manager
-            application.save()
-            messages.success( request,
-                               "Your application has been submitted successfully.")
-            return redirect("property_detail", property_id=property.id)
-    else:
-        form = PropertyApplicationForm()
-    return render(
-        request,
-        "property/apply_property.html",
-        {
-            "form": form,
-            "property": property,
-        }
-    )
 
 
 @login_required
@@ -293,6 +378,15 @@ def manager_applications(request):
             "applications": applications
         }
     )
+    application_trend = (
+    Application.objects
+    .annotate(day=TruncDay('created_at'))
+    .values('day')
+    .annotate(count=Count('id'))
+    .order_by('day')
+)
+
+    context['application_trend'] = list(application_trend)
 
 @login_required
 def edit_property(request, id):
