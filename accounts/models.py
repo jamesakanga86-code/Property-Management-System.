@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+
 class Property(models.Model):
     manager = models.ForeignKey(User,on_delete=models.CASCADE,related_name="managed_properties")
     name = models.CharField(max_length=100)
@@ -72,3 +73,37 @@ class Lease(models.Model):
     end_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     def __str__(self):return f"{self.client} - {self.unit}"  
+
+
+
+class OccupancySnapshot(models.Model):
+
+    manager = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="occupancy_snapshots"
+    )
+
+    occupied = models.PositiveIntegerField()
+
+    vacant = models.PositiveIntegerField()
+
+    total_units = models.PositiveIntegerField()
+
+    occupancy_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2
+    )
+
+    recorded_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["recorded_at"]
+
+    def __str__(self):
+        return (
+            f"{self.manager.username} - "
+            f"{self.recorded_at:%d %b %Y %H:%M}"
+        )

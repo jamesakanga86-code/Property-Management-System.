@@ -1,5 +1,4 @@
 from email.mime import application
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
@@ -26,6 +25,8 @@ from django.shortcuts import (render,redirect,get_object_or_404)
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
+from .utils import record_occupancy_snapshot
+from .models import OccupancySnapshot
 
 def home(request):
     return redirect("login")
@@ -113,6 +114,8 @@ def manager_dashboard(request):
 
     if not request.user.groups.filter(name="Managers").exists():
         return redirect("login")
+    
+    record_occupancy_snapshot(request.user)
 
     properties = Property.objects.filter(manager=request.user)
 

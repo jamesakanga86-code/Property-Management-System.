@@ -5,6 +5,7 @@ from .models import Client, Unit, Lease
 from .models import PropertyImage
 from .models import Property, Unit, Client, Lease, PropertyImage
 from .models import PropertyApplication
+from .models import OccupancySnapshot
 
 class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
@@ -58,3 +59,4 @@ class PropertyApplicationAdmin(admin.ModelAdmin):
         "client__user__username",
         "property__name",
     )
+admin.site.register(OccupancySnapshot)
