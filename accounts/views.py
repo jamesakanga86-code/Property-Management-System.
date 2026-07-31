@@ -20,12 +20,13 @@ from django.db.models import Count
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.functions import TruncMonth
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.shortcuts import (render,redirect,get_object_or_404)
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 from .utils import record_occupancy_snapshot
+from .models import Unit, Client, PropertyApplication
 from .models import OccupancySnapshot
 
 def home(request):
@@ -70,47 +71,38 @@ def login_view(request):
 
 @login_required
 def application_trend_live(request):
-
-    if not request.user.groups.filter(name="Managers").exists():
-        return JsonResponse({"error": "Unauthorized"}, status=403)
-
     now = timezone.now()
-    start_time = now - timedelta(minutes=5)
+    last_24_hours = now - timedelta(hours=24)
 
-    applications = (
+    qs = (
         PropertyApplication.objects
-        .filter(
-            manager=request.user,
-            applied_at__gte=start_time
-        )
-        .order_by("applied_at")
+        .filter(applied_at__gte=last_24_hours)
+        .extra({'hour': "strftime('%%H:00', applied_at)"})  # SQLite
+        .values('hour')
+        .annotate(count=Count('id'))
+        .order_by('hour')
     )
+
+    # Build full 24-hour timeline (fill missing hours with 0)
+    hours = [(now - timedelta(hours=i)).strftime("%H:00") for i in range(23, -1, -1)]
+
+    data_dict = {item['hour']: item['count'] for item in qs}
 
     labels = []
     values = []
 
-    current = start_time.replace(microsecond=0)
-
-    while current <= now:
-        next_slot = current + timedelta(seconds=30)
-
-        count = applications.filter(
-            applied_at__gte=current,
-            applied_at__lt=next_slot
-        ).count()
-
-        labels.append(current.strftime("%H:%M:%S"))
-        values.append(count)
-
-        current = next_slot
+    for h in hours:
+        labels.append(h)
+        values.append(data_dict.get(h, 0))  # fill missing with 0
 
     return JsonResponse({
         "labels": labels,
-        "values": values,
+        "values": values
     })
 # MANAGER DASHBOARD
 @login_required
 def manager_dashboard(request):
+
 
     if not request.user.groups.filter(name="Managers").exists():
         return redirect("login")

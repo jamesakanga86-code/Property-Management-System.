@@ -535,100 +535,38 @@ Manage your properties, applications and clients from one place.
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggleBtn = document.getElementById("toggleBtn");
-        const sidebar = document.getElementById("sidebar");
+   
+document.addEventListener("DOMContentLoaded", function () {
 
-        toggleBtn.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    });
- // =====================
-// APPLICATION CHART
-// =====================
-
-const applicationChart = new Chart(
-    document.getElementById('applicationsChart'),
-    {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Applications (30 Seconds)',
-                data: [],
-                borderColor: '#1cc88a',
-                backgroundColor: 'rgba(28,200,138,0.2)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            return Number.isInteger(value) ? value : null;
-                        }
-                    }
-                }
+    const applicationChart = new Chart(
+        document.getElementById('applicationsChart'),
+        {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Applications',
+                    data: [],
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28,200,138,0.2)',
+                    fill: true
+                }]
             }
         }
-    }
-);
+    );
 
-function updateApplicationTrend() {
-
+   function updateApplicationTrend() {
     fetch("/manager/application-trend/")
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-
             applicationChart.data.labels = data.labels;
             applicationChart.data.datasets[0].data = data.values;
-
             applicationChart.update();
-
-        })
-        .catch(error => console.error(error));
-
+        });
 }
- updateApplicationTrend();
+
+updateApplicationTrend();
 setInterval(updateApplicationTrend, 30000);
 
-    new Chart(document.getElementById('occupancyChart'), {
-        type: 'pie',
-        data: {
-            labels: occLabels,
-            datasets: [{
-                data: occValues,
-                backgroundColor: ['#1cc88a', '#e74a3b']
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-</script>
-
-<script>function updateApplicationTrend() {
-    fetch("/manager/application-trend/")
-        .then(response => response.json())
-        .then(data => {
-
-            applicationChart.data.labels = data.labels;
-            applicationChart.data.datasets[0].data = data.values;
-
-            applicationChart.update();
-
-        })
-        .catch(error => console.error(error));
-}
-
-// Refresh every 30 seconds
-setInterval(updateApplicationTrend, 30000);</script>
+});</script>
 {% endblock %}
